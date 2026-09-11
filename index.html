@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Wonderland Snake</title>
+  <title>Wonderland</title>
   <style>
     * {
       box-sizing: border-box;
@@ -14,12 +14,11 @@
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
 
-    /* Pantalla completa e inmersiva */
     body, html {
       width: 100%;
       height: 100%;
       overflow: hidden;
-      background-color: #FFF9D2; /* Amarillo pastel */
+      background-color: #FFF9D2;
       touch-action: none;
     }
 
@@ -27,10 +26,10 @@
       position: relative;
       width: 100vw;
       height: 100vh;
-      background-color: #FFF3B0; /* Mapa amarillo pastel */
+      background-color: #FFF3B0;
     }
 
-    /* HUD superior */
+    /* HUD Superior */
     .hud {
       position: absolute;
       top: 15px;
@@ -59,49 +58,43 @@
       box-shadow: 0 4px 10px rgba(0,0,0,0.05);
     }
 
-    /* Personaje principal (Estilo Viborita / Bloques Pastel) */
-    .snake-node {
+    /* Personaje principal: Único círculo pastel */
+    #player-circle {
       position: absolute;
-      width: 24px;
-      height: 24px;
+      width: 36px;
+      height: 36px;
       border-radius: 50%;
       background: #74B9FF;
-      border: 2px solid #0984E3;
+      border: 3px solid #0984E3;
+      box-shadow: 0 4px 8px rgba(116, 185, 255, 0.4);
       z-index: 5;
-      transition: left 0.08s linear, top 0.08s linear;
-    }
-
-    .snake-head {
-      background: #A29BFE;
-      border-color: #6C5CE7;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 12px;
+      font-size: 16px;
     }
-    .snake-head::after { content: '👀'; }
 
-    /* Elementos a recolectar */
+    /* Coleccionables */
     .item {
       position: absolute;
-      width: 24px;
-      height: 24px;
+      width: 30px;
+      height: 30px;
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 14px;
+      font-size: 18px;
       animation: float 1.5s infinite ease-in-out;
     }
 
     @keyframes float {
       0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-4px); }
+      50% { transform: translateY(-5px); }
     }
 
-    /* Menús en pantalla (Tienda y Niveles) */
+    /* Modal / Pantalla inicial */
     .overlay {
-      display: none;
+      display: flex;
       position: absolute;
       top: 0; left: 0;
       width: 100%; height: 100%;
@@ -118,35 +111,40 @@
       background: white;
       border: 4px solid #FDCB6E;
       border-radius: 20px;
-      padding: 20px;
+      padding: 25px 20px;
       width: 90%;
       max-width: 340px;
       box-shadow: 0 10px 25px rgba(0,0,0,0.1);
     }
 
-    .overlay h2 { color: #FF7675; margin-bottom: 10px; }
-    .overlay p { color: #636E72; font-size: 14px; margin-bottom: 15px; }
+    .overlay h2 { 
+      color: #FF7675; 
+      margin-bottom: 15px; 
+      font-size: 24px;
+    }
 
     .btn-action {
       background: #55E6C1;
       border: none;
-      padding: 10px 20px;
+      padding: 12px 24px;
       border-radius: 12px;
       color: #2D3436;
       font-weight: bold;
-      font-size: 15px;
+      font-size: 16px;
       cursor: pointer;
       margin-top: 10px;
       box-shadow: 0 4px 0 #00B894;
     }
 
-    .btn-action:active { transform: translateY(2px); box-shadow: none; }
+    .btn-action:active { 
+      transform: translateY(2px); 
+      box-shadow: none; 
+    }
   </style>
 </head>
 <body>
 
   <div id="game-container">
-    <!-- Marcadores superiores -->
     <div class="hud">
       <div class="hud-group">
         <div class="badge">Nivel <span id="level-num">1</span>/20</div>
@@ -155,14 +153,16 @@
       <div class="badge">Meta: <span id="collected">0</span>/<span id="target">5</span> 🌸</div>
     </div>
 
-    <!-- Contenedor para la serpiente y elementos -->
-    <div id="board"></div>
+    <!-- Personaje -->
+    <div id="player-circle">✨</div>
 
-    <!-- Pantalla de Cambio de Nivel -->
-    <div id="level-modal" class="overlay" style="display: flex;">
+    <!-- Items -->
+    <div id="items-container"></div>
+
+    <!-- Cartel inicial -->
+    <div id="level-modal" class="overlay">
       <div class="overlay-card">
-        <h2 id="modal-title">¡Bienvenido!</h2>
-        <p id="modal-desc">Desliza el dedo por la pantalla para mover la viborita. Recolecta las flores para avanzar por los 20 niveles.</p>
+        <h2 id="modal-title">¡Bienvenida/o!</h2>
         <button class="btn-action" onclick="startLevel()">¡Empezar!</button>
       </div>
     </div>
@@ -170,93 +170,88 @@
 
   <script>
     const container = document.getElementById('game-container');
-    const board = document.getElementById('board');
+    const player = document.getElementById('player-circle');
+    const itemsContainer = document.getElementById('items-container');
     const levelDisplay = document.getElementById('level-num');
     const coinsDisplay = document.getElementById('coins');
     const collectedDisplay = document.getElementById('collected');
     const targetDisplay = document.getElementById('target');
     const levelModal = document.getElementById('level-modal');
 
-    // Configuración del juego
     let currentLevel = 1;
     let coins = 0;
     let targetItems = 5;
     let collectedItems = 0;
-    let gameInterval = null;
     let isPlaying = false;
 
-    // Configuración del movimiento estilo Viborita
-    const gridSize = 24;
-    let dir = { x: 1, y: 0 };
-    let nextDir = { x: 1, y: 0 };
-    let snake = [{ x: 5, y: 5 }, { x: 4, y: 5 }, { x: 3, y: 5 }];
+    // Posición del círculo
+    let posX = window.innerWidth / 2 - 18;
+    let posY = window.innerHeight / 2 - 18;
     let items = [];
 
-    // Variables para el control por deslizamiento (Swipe)
-    let touchStartX = 0;
-    let touchStartY = 0;
+    // Arrastrar el círculo con el dedo
+    let isDragging = false;
 
-    // Iniciar o pasar de nivel
     function startLevel() {
       levelModal.style.display = 'none';
-      targetItems = 4 + (currentLevel * 2); // La meta sube en cada nivel
+      targetItems = 3 + (currentLevel * 2);
       collectedItems = 0;
       
       levelDisplay.innerText = currentLevel;
       targetDisplay.innerText = targetItems;
       collectedDisplay.innerText = collectedItems;
 
-      resetSnake();
+      // Posición inicial centrada
+      posX = window.innerWidth / 2 - 18;
+      posY = window.innerHeight / 2 - 18;
+      updatePlayerPosition();
+
       spawnItems();
-
       isPlaying = true;
-      clearInterval(gameInterval);
-      // La velocidad aumenta ligeramente en niveles superiores
-      const speed = Math.max(70, 150 - (currentLevel * 3));
-      gameInterval = setInterval(gameLoop, speed);
     }
 
-    function resetSnake() {
-      snake = [
-        { x: 5, y: 5 },
-        { x: 4, y: 5 },
-        { x: 3, y: 5 }
-      ];
-      dir = { x: 1, y: 0 };
-      nextDir = { x: 1, y: 0 };
+    function updatePlayerPosition() {
+      player.style.left = posX + 'px';
+      player.style.top = posY + 'px';
+      checkCollisions();
     }
 
-    // Bucle principal del juego
-    function gameLoop() {
+    function spawnItems() {
+      items = [];
+      const padding = 50;
+      const maxX = window.innerWidth - padding;
+      const maxY = window.innerHeight - padding;
+
+      for (let i = 0; i < 5; i++) {
+        items.push({
+          id: i,
+          x: Math.random() * (maxX - padding) + padding,
+          y: Math.random() * (maxY - padding * 2) + padding + 40,
+          type: Math.random() > 0.3 ? 'flower' : 'coin',
+          icon: Math.random() > 0.3 ? '🌸' : '🪙'
+        });
+      }
+      renderItems();
+    }
+
+    function renderItems() {
+      itemsContainer.innerHTML = '';
+      items.forEach(item => {
+        const el = document.createElement('div');
+        el.className = 'item';
+        el.style.left = item.x + 'px';
+        el.style.top = item.y + 'px';
+        el.innerText = item.icon;
+        itemsContainer.appendChild(el);
+      });
+    }
+
+    function checkCollisions() {
       if (!isPlaying) return;
 
-      dir = nextDir;
-      const head = { x: snake[0].x + dir.x, y: snake[0].y + dir.y };
-
-      const maxGridX = Math.floor(window.innerWidth / gridSize) - 1;
-      const maxGridY = Math.floor(window.innerHeight / gridSize) - 1;
-
-      // Atravesar los bordes de la pantalla (Efecto Loop)
-      if (head.x < 0) head.x = maxGridX;
-      if (head.x > maxGridX) head.x = 0;
-      if (head.y < 0) head.y = maxGridY;
-      if (head.y > maxGridY) head.y = 0;
-
-      // Colisión con sí misma
-      for (let i = 0; i < snake.length; i++) {
-        if (snake[i].x === head.x && snake[i].y === head.y) {
-          gameOver();
-          return;
-        }
-      }
-
-      snake.unshift(head);
-
-      // Comprobar recolección
-      let ateItem = false;
       items = items.filter(item => {
-        if (item.x === head.x && item.y === head.y) {
-          ateItem = true;
+        const dist = Math.hypot(posX - item.x, posY - item.y);
+        if (dist < 32) { // Rango de recolección
           if (item.type === 'flower') {
             collectedItems++;
             collectedDisplay.innerText = collectedItems;
@@ -269,123 +264,92 @@
         return true;
       });
 
-      if (!ateItem) {
-        snake.pop(); // Si no come, no crece
-      } else {
-        // Reaparecer coleccionables si quedan pocos
-        if (items.length < 3) spawnItems();
+      renderItems();
+
+      if (items.length < 3) {
+        spawnMoreItems();
       }
 
-      // Verificar si completó el nivel
       if (collectedItems >= targetItems) {
         completeLevel();
       }
-
-      render();
     }
 
-    // Generar elementos aleatorios
-    function spawnItems() {
-      const maxGridX = Math.floor(window.innerWidth / gridSize) - 1;
-      const maxGridY = Math.floor(window.innerHeight / gridSize) - 1;
+    function spawnMoreItems() {
+      const padding = 50;
+      const maxX = window.innerWidth - padding;
+      const maxY = window.innerHeight - padding;
 
       while (items.length < 5) {
         items.push({
-          x: Math.floor(Math.random() * (maxGridX - 2)) + 1,
-          y: Math.floor(Math.random() * (maxGridY - 4)) + 2,
+          id: Math.random(),
+          x: Math.random() * (maxX - padding) + padding,
+          y: Math.random() * (maxY - padding * 2) + padding + 40,
           type: Math.random() > 0.3 ? 'flower' : 'coin',
           icon: Math.random() > 0.3 ? '🌸' : '🪙'
         });
       }
+      renderItems();
     }
 
-    // Renderizar gráfico en pantalla
-    function render() {
-      board.innerHTML = '';
-
-      // Renderizar cuerpo de la viborita
-      snake.forEach((part, index) => {
-        const el = document.createElement('div');
-        el.className = `snake-node ${index === 0 ? 'snake-head' : ''}`;
-        el.style.left = (part.x * gridSize) + 'px';
-        el.style.top = (part.y * gridSize) + 'px';
-        board.appendChild(el);
-      });
-
-      // Renderizar items
-      items.forEach(item => {
-        const el = document.createElement('div');
-        el.className = 'item';
-        el.style.left = (item.x * gridSize) + 'px';
-        el.style.top = (item.y * gridSize) + 'px';
-        el.innerText = item.icon;
-        board.appendChild(el);
-      });
-    }
-
-    // Completar nivel
     function completeLevel() {
       isPlaying = false;
-      clearInterval(gameInterval);
 
       if (currentLevel >= 20) {
         document.getElementById('modal-title').innerText = '🎉 ¡FELICIDADES!';
-        document.getElementById('modal-desc').innerText = 'Has completado los 20 niveles de Wonderland.';
         currentLevel = 1;
       } else {
         currentLevel++;
         document.getElementById('modal-title').innerText = `¡Nivel ${currentLevel - 1} Superado!`;
-        document.getElementById('modal-desc').innerText = `Preparado para el Nivel ${currentLevel}. Tu objetivo aumenta a ${4 + (currentLevel * 2)} flores.`;
       }
       levelModal.style.display = 'flex';
     }
 
-    // Game Over
-    function gameOver() {
-      isPlaying = false;
-      clearInterval(gameInterval);
-      document.getElementById('modal-title').innerText = '¡Ups! Chocaste 🙈';
-      document.getElementById('modal-desc').innerText = `Te chocaste contigo mismo en el Nivel ${currentLevel}. ¡Inténtalo de nuevo!`;
-      levelModal.style.display = 'flex';
-    }
-
-    // CONTROLES SWIPE (Deslizar con el dedo)
+    // Controles táctiles continuos deslizando el dedo
     window.addEventListener('touchstart', (e) => {
-      touchStartX = e.touches[0].clientX;
-      touchStartY = e.touches[0].clientY;
-    });
-
-    window.addEventListener('touchend', (e) => {
       if (!isPlaying) return;
-
-      const touchEndX = e.changedTouches[0].clientX;
-      const touchEndY = e.changedTouches[0].clientY;
-
-      const diffX = touchEndX - touchStartX;
-      const diffY = touchEndY - touchStartY;
-
-      // Determinar si el movimiento fue horizontal o vertical
-      if (Math.abs(diffX) > Math.abs(diffY)) {
-        if (Math.abs(diffX) > 20) { // Umbral mínimo de deslizamiento
-          if (diffX > 0 && dir.x === 0) nextDir = { x: 1, y: 0 }; // Derecha
-          else if (diffX < 0 && dir.x === 0) nextDir = { x: -1, y: 0 }; // Izquierda
-        }
-      } else {
-        if (Math.abs(diffY) > 20) {
-          if (diffY > 0 && dir.y === 0) nextDir = { x: 0, y: 1 }; // Abajo
-          else if (diffY < 0 && dir.y === 0) nextDir = { x: 0, y: -1 }; // Arriba
-        }
-      }
+      isDragging = true;
+      moveCircle(e.touches[0]);
     });
 
-    // Soporte opcional para Teclado en PC
-    window.addEventListener('keydown', (e) => {
+    window.addEventListener('touchmove', (e) => {
+      if (!isPlaying || !isDragging) return;
+      moveCircle(e.touches[0]);
+    });
+
+    window.addEventListener('touchend', () => {
+      isDragging = false;
+    });
+
+    function moveCircle(touch) {
+      const radius = 18;
+      posX = Math.max(0, Math.min(window.innerWidth - radius * 2, touch.clientX - radius));
+      posY = Math.max(0, Math.min(window.innerHeight - radius * 2, touch.clientY - radius));
+      updatePlayerPosition();
+    }
+
+    // Soporte para mouse en PC
+    window.addEventListener('mousedown', (e) => {
       if (!isPlaying) return;
-      if (e.key === 'ArrowUp' && dir.y === 0) nextDir = { x: 0, y: -1 };
-      if (e.key === 'ArrowDown' && dir.y === 0) nextDir = { x: 0, y: 1 };
-      if (e.key === 'ArrowLeft' && dir.x === 0) nextDir = { x: -1, y: 0 };
-      if (e.key === 'ArrowRight' && dir.x === 0) nextDir = { x: 1, y: 0 };
+      isDragging = true;
+      moveCircleMouse(e);
     });
+
+    window.addEventListener('mousemove', (e) => {
+      if (!isPlaying || !isDragging) return;
+      moveCircleMouse(e);
+    });
+
+    window.addEventListener('mouseup', () => {
+      isDragging = false;
+    });
+
+    function moveCircleMouse(e) {
+      const radius = 18;
+      posX = Math.max(0, Math.min(window.innerWidth - radius * 2, e.clientX - radius));
+      posY = Math.max(0, Math.min(window.innerHeight - radius * 2, e.clientY - radius));
+      updatePlayerPosition();
+    }
   </script>
 </body>
 </html>
