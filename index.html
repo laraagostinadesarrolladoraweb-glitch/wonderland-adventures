@@ -25,21 +25,22 @@
       padding: 10px;
     }
 
-    /* Contenedor responsivo */
+    /* Mapa principal */
     #game-container {
       position: relative;
       width: 95vw;
       max-width: 800px;
-      height: 65vh;
+      height: 60vh;
       max-height: 500px;
       background-color: #FFF3B0;
       border: 6px solid #F6D776;
       border-radius: 20px;
       box-shadow: 0 8px 20px rgba(212, 175, 55, 0.2);
       overflow: hidden;
+      touch-action: none;
     }
 
-    /* HUD */
+    /* HUD superior */
     .hud {
       position: absolute;
       top: 10px;
@@ -66,44 +67,47 @@
       position: absolute;
       top: 10px;
       right: 15px;
-      font-size: 16px;
+      font-size: 14px;
       font-weight: 900;
       color: #FF7675;
     }
 
-    /* Elementos del mapa */
+    /* Decoraciones */
     .tree {
       position: absolute;
-      width: 8vw;
-      height: 8vw;
-      max-width: 50px;
-      max-height: 50px;
+      width: 45px;
+      height: 45px;
       background: #FAB1A0;
       border-radius: 50%;
       border: 3px solid #FF7675;
+      pointer-events: none;
     }
 
+    /* Tienda interactiva */
     .shop {
       position: absolute;
-      top: 10%;
+      top: 15%;
       right: 10%;
-      width: 80px;
-      height: 70px;
+      width: 85px;
+      height: 75px;
       background: #FFEAA7;
       border: 3px solid #FDCB6E;
       border-radius: 10px;
       display: flex;
+      flex-direction: column;
       align-items: center;
       justify-content: center;
       font-weight: bold;
       font-size: 11px;
       color: #D63031;
+      cursor: pointer;
+      box-shadow: 0 4px 0 #FDCB6E;
     }
     
     .shop-roof {
       position: absolute;
       top: -15px;
-      width: 90px;
+      width: 95px;
       height: 18px;
       background: #FF7675;
       border-radius: 6px;
@@ -112,14 +116,15 @@
     /* Items */
     .item {
       position: absolute;
-      width: 24px;
-      height: 24px;
+      width: 26px;
+      height: 26px;
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 12px;
+      font-size: 14px;
       animation: float 2s infinite ease-in-out;
+      pointer-events: none;
     }
 
     @keyframes float {
@@ -127,29 +132,85 @@
       50% { transform: translateY(-4px); }
     }
 
-    /* Jugador */
+    /* Personaje */
     #player {
       position: absolute;
-      width: 30px;
-      height: 30px;
+      width: 32px;
+      height: 32px;
       background: #74B9FF;
       border: 3px solid #0984E3;
       border-radius: 50%;
-      transition: all 0.08s ease-out;
+      transition: all 0.12s ease-out;
       z-index: 5;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 12px;
+      font-size: 14px;
+      pointer-events: none;
     }
-    #player::after { content: '👀'; }
 
-    /* Controles adaptados abajo del marco en celulares */
+    /* Modal / Tienda flotante */
+    #shop-modal {
+      display: none;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 85%;
+      max-width: 320px;
+      background: white;
+      border: 4px solid #FDCB6E;
+      border-radius: 16px;
+      padding: 15px;
+      z-index: 20;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+      text-align: center;
+    }
+
+    #shop-modal h3 {
+      color: #FF7675;
+      margin-bottom: 10px;
+    }
+
+    .shop-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #FFF9D2;
+      padding: 8px 12px;
+      margin: 8px 0;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: bold;
+    }
+
+    .buy-btn {
+      background: #55E6C1;
+      border: none;
+      padding: 6px 10px;
+      border-radius: 8px;
+      color: #2d3436;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .close-btn {
+      background: #FF7675;
+      border: none;
+      color: white;
+      padding: 6px 14px;
+      border-radius: 8px;
+      margin-top: 10px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    /* Controles táctiles abajo */
     .controls {
       margin-top: 12px;
       display: grid;
-      grid-template-columns: repeat(3, 50px);
-      grid-template-rows: repeat(2, 45px);
+      grid-template-columns: repeat(3, 55px);
+      grid-template-rows: repeat(2, 48px);
       gap: 6px;
       touch-action: manipulation;
     }
@@ -158,7 +219,7 @@
       background: #FFF;
       border: 2px solid #FFEAA7;
       border-radius: 12px;
-      font-size: 18px;
+      font-size: 20px;
       font-weight: bold;
       color: #6C5CE7;
       display: flex;
@@ -177,19 +238,6 @@
     .btn-left { grid-column: 1; grid-row: 2; }
     .btn-down { grid-column: 2; grid-row: 2; }
     .btn-right { grid-column: 3; grid-row: 2; }
-
-    #message {
-      position: absolute;
-      bottom: 10px;
-      right: 10px;
-      background: white;
-      padding: 6px 12px;
-      border-radius: 10px;
-      border: 2px solid #74B9FF;
-      font-size: 12px;
-      font-weight: bold;
-      display: none;
-    }
   </style>
 </head>
 <body>
@@ -202,25 +250,41 @@
     
     <div class="game-title">WONDERLAND</div>
 
-    <div class="tree" style="top: 20%; left: 15%;"></div>
-    <div class="tree" style="top: 60%; left: 20%; background: #81ECEC; border-color: #00CEC9;"></div>
-    <div class="tree" style="top: 50%; left: 75%;"></div>
+    <div class="tree" style="top: 25%; left: 15%;"></div>
+    <div class="tree" style="top: 65%; left: 20%; background: #81ECEC; border-color: #00CEC9;"></div>
+    <div class="tree" style="top: 55%; left: 75%;"></div>
 
-    <div class="shop">
+    <!-- Tienda interactiva -->
+    <div class="shop" onclick="openShop()">
       <div class="shop-roof"></div>
       TIENDA
+      <span style="font-size: 9px; color: #666; margin-top:2px;">(Toca aquí)</span>
     </div>
 
-    <div id="player"></div>
+    <div id="player">🤖</div>
     <div id="items-container"></div>
-    <div id="message">¡Tienda! 🛒</div>
+
+    <!-- Menú Ventana de la Tienda -->
+    <div id="shop-modal">
+      <h3>🏪 Tienda Pastel</h3>
+      <div class="shop-item">
+        <span>Velocidad +</span>
+        <button class="buy-btn" onclick="buyUpgrade('speed')">15 🪙</button>
+      </div>
+      <div class="shop-item">
+        <span>Nuevo Aspecto (🐱)</span>
+        <button class="buy-btn" onclick="buyUpgrade('skin')">2 🌸</button>
+      </div>
+      <button class="close-btn" onclick="closeShop()">Cerrar</button>
+    </div>
   </div>
 
+  <!-- Botones de dirección para celular -->
   <div class="controls">
-    <button class="btn btn-up" onclick="move(0, -20)">▲</button>
-    <button class="btn btn-left" onclick="move(-20, 0)">◄</button>
-    <button class="btn btn-down" onclick="move(0, 20)">▼</button>
-    <button class="btn btn-right" onclick="move(20, 0)">►</button>
+    <button class="btn btn-up" onclick="move(0, -speed)">▲</button>
+    <button class="btn btn-left" onclick="move(-speed, 0)">◄</button>
+    <button class="btn btn-down" onclick="move(0, speed)">▼</button>
+    <button class="btn btn-right" onclick="move(speed, 0)">►</button>
   </div>
 
   <script>
@@ -229,16 +293,30 @@
     const coinsDisplay = document.getElementById('coins');
     const flowersDisplay = document.getElementById('flowers');
     const itemsContainer = document.getElementById('items-container');
-    const message = document.getElementById('message');
+    const shopModal = document.getElementById('shop-modal');
 
-    const playerState = { x: 100, y: 100, coins: 0, flowers: 0 };
+    let speed = 20;
+    const playerState = { x: 80, y: 80, coins: 0, flowers: 0 };
 
     let items = [
-      { id: 1, type: 'coin', x: 80, y: 150, icon: '🪙' },
-      { id: 2, type: 'coin', x: 200, y: 80, icon: '🪙' },
-      { id: 3, type: 'flower', x: 150, y: 180, icon: '🌸' },
-      { id: 4, type: 'flower', x: 220, y: 140, icon: '🌸' }
+      { id: 1, type: 'coin', x: 60, y: 160, icon: '🪙' },
+      { id: 2, type: 'coin', x: 180, y: 90, icon: '🪙' },
+      { id: 3, type: 'flower', x: 140, y: 200, icon: '🌸' },
+      { id: 4, type: 'flower', x: 240, y: 150, icon: '🌸' },
+      { id: 5, type: 'coin', x: 200, y: 220, icon: '🪙' }
     ];
+
+    // Mover tocando la pantalla directamente
+    container.addEventListener('pointerdown', (e) => {
+      if (e.target.closest('#shop-modal') || e.target.closest('.shop')) return;
+      const rect = container.getBoundingClientRect();
+      const clickX = e.clientX - rect.left - 16;
+      const clickY = e.clientY - rect.top - 16;
+      
+      playerState.x = Math.max(5, Math.min(container.clientWidth - 35, clickX));
+      playerState.y = Math.max(5, Math.min(container.clientHeight - 35, clickY));
+      updatePlayerPosition();
+    });
 
     function updatePlayerPosition() {
       player.style.left = playerState.x + 'px';
@@ -274,7 +352,7 @@
     function checkCollisions() {
       items = items.filter(item => {
         const dist = Math.hypot(playerState.x - item.x, playerState.y - item.y);
-        if (dist < 28) {
+        if (dist < 30) {
           if (item.type === 'coin') playerState.coins += 10;
           if (item.type === 'flower') playerState.flowers += 1;
           
@@ -285,22 +363,40 @@
         return true;
       });
       renderItems();
-
-      const shopEl = document.querySelector('.shop');
-      const shopDist = Math.hypot(playerState.x - shopEl.offsetLeft, playerState.y - shopEl.offsetTop);
-      if (shopDist < 50) {
-        message.style.display = 'block';
-      } else {
-        message.style.display = 'none';
-      }
     }
 
+    // Funciones de la Tienda
+    function openShop() {
+      shopModal.style.display = 'block';
+    }
+
+    function closeShop() {
+      shopModal.style.display = 'none';
+    }
+
+    function buyUpgrade(type) {
+      if (type === 'speed' && playerState.coins >= 15) {
+        playerState.coins -= 15;
+        speed += 10;
+        alert('¡Velocidad aumentada!');
+      } else if (type === 'skin' && playerState.flowers >= 2) {
+        playerState.flowers -= 2;
+        player.innerText = '🐱';
+        alert('¡Nuevo aspecto desbloqueado!');
+      } else {
+        alert('¡No tienes suficientes recursos!');
+      }
+      coinsDisplay.innerText = playerState.coins;
+      flowersDisplay.innerText = playerState.flowers;
+    }
+
+    // Teclado opcional
     window.addEventListener('keydown', (e) => {
       switch(e.key) {
-        case 'ArrowUp': case 'w': move(0, -15); break;
-        case 'ArrowDown': case 's': move(0, 15); break;
-        case 'ArrowLeft': case 'a': move(-15, 0); break;
-        case 'ArrowRight': case 'd': move(15, 0); break;
+        case 'ArrowUp': case 'w': move(0, -speed); break;
+        case 'ArrowDown': case 's': move(0, speed); break;
+        case 'ArrowLeft': case 'a': move(-speed, 0); break;
+        case 'ArrowRight': case 'd': move(speed, 0); break;
       }
     });
 
