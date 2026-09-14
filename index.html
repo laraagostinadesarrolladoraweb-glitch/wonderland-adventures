@@ -2,695 +2,347 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>Michi - Mi Mascota Virtual</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Wonderland</title>
   <style>
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       user-select: none;
       -webkit-user-select: none;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
 
-    body {
-      background: radial-gradient(circle at center, #fffbeb 0%, #fef3c7 100%);
-      min-height: 100vh;
-      min-height: -webkit-fill-available;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      align-items: center;
-      padding: 16px 16px max(24px, env(safe-area-inset-bottom));
-      overflow: hidden;
-      position: relative;
-    }
-
-    .bg-particle {
-      position: absolute;
-      background: rgba(255, 255, 255, 0.7);
-      border-radius: 50%;
-      pointer-events: none;
-      animation: floatBg 8s infinite ease-in-out;
-    }
-
-    @keyframes floatBg {
-      0%, 100% { transform: translateY(0) scale(1); opacity: 0.5; }
-      50% { transform: translateY(-30px) scale(1.1); opacity: 0.9; }
-    }
-
-    .header {
+    body, html {
       width: 100%;
-      max-width: 400px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 8px;
-      z-index: 10;
-    }
-
-    .nombre-mascota {
-      color: #b45309;
-      font-size: 26px;
-      font-weight: 900;
-      letter-spacing: 1px;
-      text-shadow: 0 2px 10px rgba(245, 158, 11, 0.2);
-    }
-
-    .texto-cancion {
-      font-size: 12px;
-      font-weight: 700;
-      color: #92400e;
-      background: rgba(255, 255, 255, 0.6);
-      padding: 4px 12px;
-      border-radius: 12px;
-      text-align: center;
-    }
-
-    .barras-container {
-      width: 100%;
-      display: flex;
-      gap: 12px;
-      background: rgba(255, 255, 255, 0.88);
-      backdrop-filter: blur(10px);
-      padding: 10px 14px;
-      border-radius: 18px;
-      box-shadow: 0 8px 20px rgba(180, 83, 9, 0.1);
-      border: 2px solid rgba(255, 255, 255, 0.9);
-    }
-
-    .barra-item {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
-
-    .barra-label {
-      font-size: 11px;
-      font-weight: 800;
-      color: #78350f;
-      display: flex;
-      justify-content: space-between;
-    }
-
-    .progreso-track {
-      background: #fde68a;
-      height: 10px;
-      border-radius: 10px;
-      overflow: hidden;
-      position: relative;
-    }
-
-    .progreso-fill {
       height: 100%;
-      width: 100%;
-      border-radius: 10px;
-      transition: width 0.4s ease;
+      overflow: hidden;
+      background-color: #FFF9D2;
+      touch-action: none;
     }
 
-    #fill-hambre {
-      background: linear-gradient(90deg, #34d399, #10b981);
+    #game-container {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      background-color: #FFF3B0;
     }
 
-    #fill-felicidad {
-      background: linear-gradient(90deg, #f59e0b, #d97706);
+    /* HUD Superior */
+    .hud {
+      position: absolute;
+      top: 15px;
+      left: 15px;
+      right: 15px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 10;
+      pointer-events: none;
     }
 
-    .controls {
-      width: 100%;
-      max-width: 400px;
+    .hud-group {
       display: flex;
       gap: 10px;
-      margin-top: 6px;
-      z-index: 10;
     }
 
-    .btn {
-      flex: 1;
-      background: #ffffff;
-      color: #78350f;
-      border: none;
-      padding: 12px 8px;
-      border-radius: 16px;
-      font-weight: 800;
-      font-size: 15px;
-      box-shadow: 0 6px 16px rgba(180, 83, 9, 0.12);
-      cursor: pointer;
+    .badge {
+      background: rgba(255, 255, 255, 0.9);
+      padding: 8px 14px;
+      border-radius: 20px;
+      font-weight: bold;
+      font-size: 14px;
+      color: #6C5CE7;
+      border: 2px solid #FFEAA7;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    }
+
+    /* Personaje principal: Único círculo pastel limpio */
+    #player-circle {
+      position: absolute;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: #74B9FF;
+      border: 3px solid #0984E3;
+      box-shadow: 0 4px 8px rgba(116, 185, 255, 0.4);
+      z-index: 5;
+    }
+
+    /* Coleccionables */
+    .item {
+      position: absolute;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 6px;
-      transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-      border: 2px solid rgba(255, 255, 255, 0.8);
-      touch-action: manipulation;
-    }
-
-    .btn:active {
-      transform: scale(0.92);
-      box-shadow: 0 4px 10px rgba(180, 83, 9, 0.1);
-    }
-
-    .btn-icon {
       font-size: 18px;
+      animation: float 1.5s infinite ease-in-out;
     }
 
-    .btn-audio {
-      background: #fde68a;
-      font-size: 12px;
-      padding: 6px 12px;
-      border-radius: 12px;
-      border: none;
-      color: #78350f;
-      font-weight: 800;
-      cursor: pointer;
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-5px); }
     }
 
-    .stage {
-      flex: 1;
-      width: 100%;
-      max-width: 400px;
+    /* Modal / Pantalla inicial */
+    .overlay {
       display: flex;
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(255, 249, 210, 0.92);
+      z-index: 20;
       flex-direction: column;
       justify-content: center;
       align-items: center;
-      position: relative;
-      z-index: 5;
-      padding: 10px 0;
-    }
-
-    .speech-bubble {
-      background: #ffffff;
-      color: #78350f;
-      padding: 10px 16px;
-      border-radius: 18px;
-      font-weight: 700;
-      font-size: 12px;
-      line-height: 1.4;
-      box-shadow: 0 8px 20px rgba(180, 83, 9, 0.12);
-      margin-bottom: 14px;
-      position: relative;
-      border: 2px solid #f59e0b;
-      max-width: 90%;
+      padding: 20px;
       text-align: center;
-      transition: transform 0.2s ease;
     }
 
-    .speech-bubble::after {
-      content: '';
-      position: absolute;
-      bottom: -9px;
-      left: 50%;
-      transform: translateX(-50%);
-      border-width: 9px 9px 0;
-      border-style: solid;
-      border-color: #ffffff transparent;
-      display: block;
-      width: 0;
+    .overlay-card {
+      background: white;
+      border: 4px solid #FDCB6E;
+      border-radius: 20px;
+      padding: 25px 20px;
+      width: 90%;
+      max-width: 340px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.1);
     }
 
-    .speech-bubble::before {
-      content: '';
-      position: absolute;
-      bottom: -11px;
-      left: 50%;
-      transform: translateX(-50%);
-      border-width: 10px 10px 0;
-      border-style: solid;
-      border-color: #f59e0b transparent;
-      display: block;
-      width: 0;
+    .overlay h2 { 
+      color: #FF7675; 
+      margin-bottom: 15px; 
+      font-size: 24px;
     }
 
-    .michi-wrapper {
-      width: 160px;
-      height: 160px;
+    .btn-action {
+      background: #55E6C1;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 12px;
+      color: #2D3436;
+      font-weight: bold;
+      font-size: 16px;
       cursor: pointer;
-      position: relative;
-      animation: floatIdle 3.5s infinite ease-in-out;
-      transition: transform 0.2s ease;
+      margin-top: 10px;
+      box-shadow: 0 4px 0 #00B894;
     }
 
-    @keyframes floatIdle {
-      0%, 100% { transform: translateY(0px) rotate(0deg); }
-      50% { transform: translateY(-10px) rotate(2deg); }
-    }
-
-    .michi-wrapper.happy-bounce {
-      animation: bounce 0.6s ease;
-    }
-
-    .michi-wrapper.eat-wiggle {
-      animation: chew 0.8s ease;
-    }
-
-    .michi-wrapper.catch-ball {
-      animation: catchJump 0.8s ease;
-    }
-
-    .michi-wrapper.surprise-entry {
-      animation: popIn 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    }
-
-    @keyframes popIn {
-      0% { transform: scale(0) rotate(-15deg); opacity: 0; }
-      70% { transform: scale(1.2) rotate(5deg); opacity: 1; }
-      100% { transform: scale(1) rotate(0deg); }
-    }
-
-    @keyframes bounce {
-      0%, 100% { transform: translateY(0) scale(1); }
-      30% { transform: translateY(-25px) scale(1.1, 0.9); }
-      60% { transform: translateY(0) scale(0.95, 1.05); }
-    }
-
-    @keyframes chew {
-      0%, 100% { transform: scale(1); }
-      20% { transform: scale(1.08, 0.92) translateY(5px); }
-      40% { transform: scale(0.95, 1.05) translateY(-3px); }
-      60% { transform: scale(1.05, 0.95) translateY(3px); }
-      80% { transform: scale(0.98, 1.02); }
-    }
-
-    @keyframes catchJump {
-      0% { transform: translateY(0) scale(1); }
-      30% { transform: translateY(-35px) rotate(-8deg) scale(1.1); }
-      60% { transform: translateY(-10px) rotate(5deg) scale(0.95); }
-      100% { transform: translateY(0) scale(1); }
-    }
-
-    .animated-item {
-      position: absolute;
-      font-size: 32px;
-      pointer-events: none;
-      z-index: 15;
-    }
-
-    .anim-fish {
-      animation: dropFish 0.6s forwards cubic-bezier(0.5, 0, 0.75, 0);
-    }
-
-    @keyframes dropFish {
-      0% { transform: translateY(-120px) rotate(0deg) scale(1.2); opacity: 1; }
-      70% { opacity: 1; }
-      100% { transform: translateY(20px) rotate(180deg) scale(0.4); opacity: 0; }
-    }
-
-    .anim-ball {
-      animation: throwBall 0.8s forwards ease-out;
-    }
-
-    @keyframes throwBall {
-      0% { transform: translate(-140px, 60px) rotate(0deg) scale(1); opacity: 1; }
-      50% { transform: translate(-40px, -40px) rotate(180deg) scale(1.2); }
-      80% { transform: translate(0px, 10px) rotate(360deg) scale(0.9); opacity: 1; }
-      100% { transform: translate(10px, 20px) rotate(400deg) scale(0.2); opacity: 0; }
-    }
-
-    .shadow {
-      width: 110px;
-      height: 14px;
-      background: rgba(180, 83, 9, 0.15);
-      border-radius: 50%;
-      margin-top: 8px;
-      animation: shadowScale 3.5s infinite ease-in-out;
-    }
-
-    @keyframes shadowScale {
-      0%, 100% { transform: scale(1); opacity: 0.5; }
-      50% { transform: scale(0.75); opacity: 0.25; }
-    }
-
-    .confetti-particle, .heart-particle {
-      position: absolute;
-      pointer-events: none;
-      animation: floatUp 1.2s forwards ease-out;
-      z-index: 20;
-    }
-
-    @keyframes floatUp {
-      0% { opacity: 1; transform: translateY(0) scale(0.8) rotate(0deg); }
-      100% { opacity: 0; transform: translateY(-70px) scale(1.4) rotate(45deg); }
+    .btn-action:active { 
+      transform: translateY(2px); 
+      box-shadow: none; 
     }
   </style>
 </head>
 <body>
 
-  <!-- Reproductor de audio privado -->
-  <audio id="musica-fondo" loop>
-    <source src="cancion.mp3" type="audio/mpeg">
-  </audio>
-
-  <div class="bg-particle" style="width: 80px; height: 80px; top: 10%; left: 10%;"></div>
-  <div class="bg-particle" style="width: 120px; height: 120px; top: 60%; right: 5%; animation-delay: -3s;"></div>
-
-  <div class="header">
-    <div class="nombre-mascota">Michi</div>
-    
-    <div class="texto-cancion" id="subtitulo-cancion">🔒 Canción privada protegida</div>
-    <button class="btn-audio" id="btn-audio" onclick="gestionarMusica()">🔒 Música Privada</button>
-
-    <div class="barras-container">
-      <div class="barra-item">
-        <div class="barra-label"><span>Hambre</span><span id="txt-hambre">100%</span></div>
-        <div class="progreso-track"><div class="progreso-fill" id="fill-hambre"></div></div>
+  <div id="game-container">
+    <div class="hud">
+      <div class="hud-group">
+        <div class="badge">Nivel <span id="level-num">1</span>/20</div>
+        <div class="badge">🪙 <span id="coins">0</span></div>
       </div>
-      <div class="barra-item">
-        <div class="barra-label"><span>Felicidad</span><span id="txt-felicidad">100%</span></div>
-        <div class="progreso-track"><div class="progreso-fill" id="fill-felicidad"></div></div>
+      <div class="badge">Meta: <span id="collected">0</span>/<span id="target">5</span> 🌸</div>
+    </div>
+
+    <!-- Círculo sin emoji -->
+    <div id="player-circle"></div>
+
+    <!-- Items -->
+    <div id="items-container"></div>
+
+    <!-- Cartel inicial -->
+    <div id="level-modal" class="overlay">
+      <div class="overlay-card">
+        <h2 id="modal-title">¡Bienvenida/o!</h2>
+        <button class="btn-action" onclick="startLevel()">¡Empezar!</button>
       </div>
     </div>
-
-    <!-- Botones de Comer y Jugar ubicados justo debajo de las barras -->
-    <div class="controls">
-      <button class="btn" id="btn-comer" onclick="alimentar()">
-        <span class="btn-icon">🐟</span>
-        <span>Comer</span>
-      </button>
-      <button class="btn" id="btn-jugar" onclick="jugar()">
-        <span class="btn-icon">🎾</span>
-        <span>Jugar</span>
-      </button>
-    </div>
-  </div>
-
-  <div class="stage" id="stage-area">
-    <div class="speech-bubble" id="bocadillo">¡Hola! Tócame para mimarme o aprender algo nuevo 🐾</div>
-    
-    <div class="michi-wrapper surprise-entry" id="michi-box" onclick="acariciar(event)">
-      <svg id="michi-svg" viewBox="0 0 100 100" width="100%" height="100%">
-        <!-- Cola -->
-        <path d="M 75 75 Q 92 60 85 45" fill="none" stroke="#e67e22" stroke-width="5" stroke-linecap="round">
-          <animateTransform attributeName="transform" type="rotate" values="0 75 75; 8 75 75; 0 75 75" dur="2s" repeatCount="indefinite"/>
-        </path>
-
-        <!-- Patitas traseras -->
-        <ellipse cx="28" cy="78" rx="7" ry="5" fill="#ffffff" stroke="#d35400" stroke-width="1"/>
-        <ellipse cx="72" cy="78" rx="7" ry="5" fill="#ffffff" stroke="#d35400" stroke-width="1"/>
-
-        <!-- Orejas -->
-        <polygon points="22,40 12,18 36,28" fill="#e67e22" stroke="#d35400" stroke-width="1.5"/>
-        <polygon points="24,36 17,22 33,28" fill="#f2a685"/>
-        
-        <polygon points="78,40 88,18 64,28" fill="#e67e22" stroke="#d35400" stroke-width="1.5"/>
-        <polygon points="76,36 83,22 67,28" fill="#f2a685"/>
-
-        <!-- Cabeza Base Naranja -->
-        <ellipse cx="50" cy="58" rx="32" ry="28" fill="#e67e22" stroke="#d35400" stroke-width="2"/>
-
-        <!-- Mancha Blanca -->
-        <path d="M 50 42 C 40 46 38 62 38 72 C 44 80 56 80 62 72 C 62 62 60 46 50 42 Z" fill="#ffffff"/>
-
-        <!-- Rayas en frente -->
-        <path d="M 44 38 L 47 44 M 50 36 L 50 43 M 56 38 L 53 44" stroke="#d35400" stroke-width="2" stroke-linecap="round"/>
-
-        <!-- Rubor -->
-        <ellipse cx="30" cy="64" rx="4" ry="2.5" fill="#f2a685" opacity="0.6"/>
-        <ellipse cx="70" cy="64" rx="4" ry="2.5" fill="#f2a685" opacity="0.6"/>
-
-        <!-- Bigotes -->
-        <g id="bigotes">
-          <line x1="16" y1="60" x2="28" y2="62" stroke="#2c3e50" stroke-width="1.2" stroke-linecap="round"/>
-          <line x1="14" y1="66" x2="27" y2="65" stroke="#2c3e50" stroke-width="1.2" stroke-linecap="round"/>
-          <line x1="84" y1="60" x2="72" y2="62" stroke="#2c3e50" stroke-width="1.2" stroke-linecap="round"/>
-          <line x1="86" y1="66" x2="73" y2="65" stroke="#2c3e50" stroke-width="1.2" stroke-linecap="round"/>
-        </g>
-
-        <!-- Nariz -->
-        <polygon points="48,59 52,59 50,62" fill="#e8a7a1"/>
-
-        <!-- Ojos -->
-        <g id="ojos">
-          <circle cx="37" cy="53" r="5" fill="#5c3d2e"/>
-          <circle cx="37" cy="53" r="3" fill="#1f110b"/>
-          <circle cx="35.5" cy="51.5" r="1.2" fill="#ffffff"/>
-
-          <circle cx="63" cy="53" r="5" fill="#5c3d2e"/>
-          <circle cx="63" cy="53" r="3" fill="#1f110b"/>
-          <circle cx="61.5" cy="51.5" r="1.2" fill="#ffffff"/>
-        </g>
-
-        <!-- Boca -->
-        <path id="boca" d="M 45 64 Q 50 67 55 64" fill="none" stroke="#2c3e50" stroke-width="1.8" stroke-linecap="round"/>
-
-        <!-- Patitas delanteras -->
-        <g id="patitas">
-          <ellipse cx="42" cy="78" rx="5" ry="4" fill="#ffffff" stroke="#d35400" stroke-width="1"/>
-          <ellipse cx="58" cy="78" rx="5" ry="4" fill="#ffffff" stroke="#d35400" stroke-width="1"/>
-        </g>
-      </svg>
-    </div>
-
-    <div class="shadow"></div>
   </div>
 
   <script>
-    const CLAVE_CORRECTA = "thelifeofthemichi";
-    let musicaDesbloqueada = localStorage.getItem('michi_musica_auth') === 'true';
+    const container = document.getElementById('game-container');
+    const player = document.getElementById('player-circle');
+    const itemsContainer = document.getElementById('items-container');
+    const levelDisplay = document.getElementById('level-num');
+    const coinsDisplay = document.getElementById('coins');
+    const collectedDisplay = document.getElementById('collected');
+    const targetDisplay = document.getElementById('target');
+    const levelModal = document.getElementById('level-modal');
 
-    let hambre = parseInt(localStorage.getItem('michi_v9_hambre')) || 100;
-    let felicidad = parseInt(localStorage.getItem('michi_v9_felicidad')) || 100;
+    let currentLevel = 1;
+    let coins = 0;
+    let targetItems = 5;
+    let collectedItems = 0;
+    let isPlaying = false;
 
-    const fillHambre = document.getElementById('fill-hambre');
-    const fillFelicidad = document.getElementById('fill-felicidad');
-    const txtHambre = document.getElementById('txt-hambre');
-    const txtFelicidad = document.getElementById('txt-felicidad');
-    const ojos = document.getElementById('ojos');
-    const boca = document.getElementById('boca');
-    const bocadillo = document.getElementById('bocadillo');
-    const michiBox = document.getElementById('michi-box');
-    const stageArea = document.getElementById('stage-area');
-    const musica = document.getElementById('musica-fondo');
-    const btnAudio = document.getElementById('btn-audio');
-    const subtituloCancion = document.getElementById('subtitulo-cancion');
+    let posX = window.innerWidth / 2 - 18;
+    let posY = window.innerHeight / 2 - 18;
+    let items = [];
 
-    const frasesComer = [
-      "🐟 ¡Mmm... delicioso!",
-      "🐱 ¡Gracias por la comida!",
-      "😋 Mi pancita está feliz.",
-      "🐟 ¡Ñam ñam, qué rico!"
-    ];
+    let isDragging = false;
 
-    const frasesJugar = [
-      "🎾 ¡Sí! Me encanta este juego.",
-      "😸 ¡Qué divertido!",
-      "🎾 ¡Atrapé la pelota!",
-      "🐾 ¡Buen tiro!"
-    ];
+    function startLevel() {
+      levelModal.style.display = 'none';
+      targetItems = 3 + (currentLevel * 2);
+      collectedItems = 0;
+      
+      levelDisplay.innerText = currentLevel;
+      targetDisplay.innerText = targetItems;
+      collectedDisplay.innerText = collectedItems;
 
-    const sabiduriaGatuna = [
-      "💡 Cuidado real: Nunca le des leche de vaca a un gato adulto, no la digieren bien.",
-      "📜 Historia: En el Antiguo Egipto, los gatos eran sagrados y protegían las cosechas.",
-      "💡 Cuidado real: Los gatos prefieren su agua alejada de su plato de comida.",
-      "📜 Historia: El maullido fue desarrollado por los gatos casi en su totalidad para comunicarse con los humanos.",
-      "💡 Cuidado real: Cepillar a tu gato seguido evita que trague tantas bolas de pelo.",
-      "📜 Historia: Un gato en la Edad Media era el mejor protector de los graneros contra plagas.",
-      "💡 Cuidado real: Jugar 15 minutos al día ayuda a prevenir el estrés y sobrepeso en gatos."
-    ];
+      posX = window.innerWidth / 2 - 18;
+      posY = window.innerHeight / 2 - 18;
+      updatePlayerPosition();
 
-    function actualizarEstadoBotonMusica() {
-      if (!musicaDesbloqueada) {
-        btnAudio.innerText = "🔒 Música Privada";
-        subtituloCancion.innerText = "🔒 Canción privada protegida";
+      spawnItems();
+      isPlaying = true;
+    }
+
+    function updatePlayerPosition() {
+      player.style.left = posX + 'px';
+      player.style.top = posY + 'px';
+      checkCollisions();
+    }
+
+    function spawnItems() {
+      items = [];
+      const padding = 50;
+      const maxX = window.innerWidth - padding;
+      const maxY = window.innerHeight - padding;
+
+      for (let i = 0; i < 5; i++) {
+        items.push({
+          id: i,
+          x: Math.random() * (maxX - padding) + padding,
+          y: Math.random() * (maxY - padding * 2) + padding + 40,
+          type: Math.random() > 0.3 ? 'flower' : 'coin',
+          icon: Math.random() > 0.3 ? '🌸' : '🪙'
+        });
+      }
+      renderItems();
+    }
+
+    function renderItems() {
+      itemsContainer.innerHTML = '';
+      items.forEach(item => {
+        const el = document.createElement('div');
+        el.className = 'item';
+        el.style.left = item.x + 'px';
+        el.style.top = item.y + 'px';
+        el.innerText = item.icon;
+        itemsContainer.appendChild(el);
+      });
+    }
+
+    function checkCollisions() {
+      if (!isPlaying) return;
+
+      items = items.filter(item => {
+        const dist = Math.hypot(posX - item.x, posY - item.y);
+        if (dist < 32) {
+          if (item.type === 'flower') {
+            collectedItems++;
+            collectedDisplay.innerText = collectedItems;
+          } else {
+            coins += 10;
+            coinsDisplay.innerText = coins;
+          }
+          return false;
+        }
+        return true;
+      });
+
+      renderItems();
+
+      if (items.length < 3) {
+        spawnMoreItems();
+      }
+
+      if (collectedItems >= targetItems) {
+        completeLevel();
+      }
+    }
+
+    function spawnMoreItems() {
+      const padding = 50;
+      const maxX = window.innerWidth - padding;
+      const maxY = window.innerHeight - padding;
+
+      while (items.length < 5) {
+        items.push({
+          id: Math.random(),
+          x: Math.random() * (maxX - padding) + padding,
+          y: Math.random() * (maxY - padding * 2) + padding + 40,
+          type: Math.random() > 0.3 ? 'flower' : 'coin',
+          icon: Math.random() > 0.3 ? '🌸' : '🪙'
+        });
+      }
+      renderItems();
+    }
+
+    function completeLevel() {
+      isPlaying = false;
+
+      if (currentLevel >= 20) {
+        document.getElementById('modal-title').innerText = '🎉 ¡FELICIDADES!';
+        currentLevel = 1;
       } else {
-        if (musica.paused) {
-          btnAudio.innerText = "🎵 Reproducir Música";
-          subtituloCancion.innerText = "🎵 Canción pausada";
-        } else {
-          btnAudio.innerText = "⏸️ Pausar Música";
-          subtituloCancion.innerText = "🎵 \"Escuchando nuestra melodía favorita\"";
-        }
+        currentLevel++;
+        document.getElementById('modal-title').innerText = `¡Nivel ${currentLevel - 1} Superado!`;
       }
+      levelModal.style.display = 'flex';
     }
 
-    function gestionarMusica() {
-      if (!musicaDesbloqueada) {
-        const passwordIngresada = prompt("Ingresa la contraseña privada para reproducir la canción:");
-        if (passwordIngresada === CLAVE_CORRECTA) {
-          musicaDesbloqueada = true;
-          localStorage.setItem('michi_musica_auth', 'true');
-          alert("¡Acceso concedido! Reproduciendo canción privada.");
-          musica.play();
-        } else if (passwordIngresada !== null) {
-          alert("Contraseña incorrecta. Acceso denegado.");
-        }
-      } else {
-        if (musica.paused) {
-          musica.play();
-        } else {
-          musica.pause();
-        }
-      }
-      actualizarEstadoBotonMusica();
-    }
-
-    function guardar() {
-      localStorage.setItem('michi_v9_hambre', hambre);
-      localStorage.setItem('michi_v9_felicidad', felicidad);
-    }
-
-    function mostrarTexto(msg) {
-      bocadillo.innerText = msg;
-    }
-
-    function obtenerElementoAleatorio(array) {
-      return array[Math.floor(Math.random() * array.length)];
-    }
-
-    function actualizarInterfaz(mensajePersonalizado = null) {
-      fillHambre.style.width = hambre + '%';
-      fillFelicidad.style.width = felicidad + '%';
-      txtHambre.innerText = hambre + '%';
-      txtFelicidad.innerText = felicidad + '%';
-
-      if (hambre <= 0 || felicidad <= 0) {
-        ojos.innerHTML = `
-          <path d="M 33 55 L 41 49" stroke="#2c3e50" stroke-width="2" stroke-linecap="round"/>
-          <path d="M 33 49 L 41 55" stroke="#2c3e50" stroke-width="2" stroke-linecap="round"/>
-          <path d="M 59 55 L 67 49" stroke="#2c3e50" stroke-width="2" stroke-linecap="round"/>
-          <path d="M 59 49 L 67 55" stroke="#2c3e50" stroke-width="2" stroke-linecap="round"/>
-        `;
-        boca.setAttribute('d', 'M 45 67 Q 50 62 55 67');
-        
-        if (mensajePersonalizado) {
-          mostrarTexto(mensajePersonalizado);
-        } else if (hambre <= 0 && felicidad <= 0) {
-          mostrarTexto("😿 ¡Tengo mucha hambre y pena! Toca 'Comer' 🐟 y 'Jugar' 🎾");
-        } else if (hambre <= 0) {
-          mostrarTexto("😾 ¡No tengo energía! Toca el botón 'Comer' 🐟");
-        } else {
-          mostrarTexto("😿 Estoy triste... Presiona 'Jugar' 🎾");
-        }
-      } else if (hambre < 40 || felicidad < 40) {
-        ojos.innerHTML = `
-          <circle cx="37" cy="53" r="3.5" fill="#1f110b"/>
-          <circle cx="63" cy="53" r="3.5" fill="#1f110b"/>
-        `;
-        boca.setAttribute('d', 'M 45 65 L 55 65');
-        
-        if (mensajePersonalizado) {
-          mostrarTexto(mensajePersonalizado);
-        } else if (hambre < 40 && felicidad < 40) {
-          mostrarTexto("🙀 Presiona 'Comer' 🐟 para alimentarme y 'Jugar' 🎾 para alegrarme.");
-        } else if (hambre < 40) {
-          mostrarTexto("😾 Tengo hambre... ¡Presiona el botón 'Comer' 🐟!");
-        } else {
-          mostrarTexto("😿 Me estoy aburriendo... Presiona 'Jugar' 🎾.");
-        }
-      } else {
-        ojos.innerHTML = `
-          <circle cx="37" cy="53" r="5" fill="#5c3d2e"/>
-          <circle cx="37" cy="53" r="3" fill="#1f110b"/>
-          <circle cx="35.5" cy="51.5" r="1.2" fill="#ffffff"/>
-          <circle cx="63" cy="53" r="5" fill="#5c3d2e"/>
-          <circle cx="63" cy="53" r="3" fill="#1f110b"/>
-          <circle cx="61.5" cy="51.5" r="1.2" fill="#ffffff"/>
-        `;
-        boca.setAttribute('d', 'M 45 64 Q 50 67 55 64');
-        if (mensajePersonalizado) {
-          mostrarTexto(mensajePersonalizado);
-        }
-      }
-    }
-
-    function triggerAnim(className) {
-      michiBox.classList.remove('happy-bounce', 'eat-wiggle', 'catch-ball', 'surprise-entry');
-      void michiBox.offsetWidth;
-      michiBox.classList.add(className);
-    }
-
-    function lanzarsorpresaInicial() {
-      const emojis = ['🎉', '💛', '🐾', '🎈', '💖'];
-      const rect = michiBox.getBoundingClientRect();
-      for (let i = 0; i < 10; i++) {
-        setTimeout(() => {
-          const p = document.createElement('div');
-          p.className = 'confetti-particle';
-          p.innerText = emojis[Math.floor(Math.random() * emojis.length)];
-          p.style.fontSize = (18 + Math.random() * 14) + 'px';
-          p.style.left = (rect.left + rect.width / 2 + (Math.random() * 120 - 60)) + 'px';
-          p.style.top = (rect.top + rect.height / 2 + (Math.random() * 40 - 20)) + 'px';
-          document.body.appendChild(p);
-          setTimeout(() => p.remove(), 1200);
-        }, i * 80);
-      }
-    }
-
-    function spawnHeart(e) {
-      const heart = document.createElement('div');
-      heart.className = 'heart-particle';
-      heart.innerText = '💖';
-      const rect = michiBox.getBoundingClientRect();
-      heart.style.left = (e.clientX || (rect.left + rect.width / 2)) + 'px';
-      heart.style.top = (e.clientY || (rect.top + rect.height / 2)) + 'px';
-      document.body.appendChild(heart);
-      setTimeout(() => heart.remove(), 1000);
-    }
-
-    function alimentar() {
-      hambre = Math.min(100, hambre + 25);
-      if (felicidad < 20) felicidad = Math.min(100, felicidad + 10);
-      guardar();
-
-      const fish = document.createElement('div');
-      fish.className = 'animated-item anim-fish';
-      fish.innerText = '🐟';
-      stageArea.appendChild(fish);
-
-      boca.setAttribute('d', 'M 44 63 Q 50 72 56 63');
-
-      setTimeout(() => {
-        triggerAnim('eat-wiggle');
-        fish.remove();
-        actualizarInterfaz(obtenerElementoAleatorio(frasesComer));
-      }, 500);
-    }
-
-    function jugar() {
-      felicidad = Math.min(100, felicidad + 25);
-      hambre = Math.max(0, hambre - 5);
-      guardar();
-
-      const ball = document.createElement('div');
-      ball.className = 'animated-item anim-ball';
-      ball.innerText = '🎾';
-      stageArea.appendChild(ball);
-
-      setTimeout(() => {
-        triggerAnim('catch-ball');
-      }, 200);
-
-      setTimeout(() => {
-        ball.remove();
-        actualizarInterfaz(obtenerElementoAleatorio(frasesJugar));
-      }, 700);
-    }
-
-    function acariciar(e) {
-      spawnHeart(e);
-      triggerAnim('happy-bounce');
-      if (hambre < 40 || felicidad < 40) {
-        actualizarInterfaz();
-      } else {
-        actualizarInterfaz(obtenerElementoAleatorio(sabiduriaGatuna));
-      }
-    }
-
-    setInterval(() => {
-      if (hambre > 0 || felicidad > 0) {
-        hambre = Math.max(0, hambre - 2);
-        felicidad = Math.max(0, felicidad - 2);
-        guardar();
-        actualizarInterfaz();
-      }
-    }, 7000);
-
-    window.addEventListener('load', () => {
-      actualizarInterfaz();
-      actualizarEstadoBotonMusica();
-      lanzarsorpresaInicial();
+    // Eventos táctiles
+    window.addEventListener('touchstart', (e) => {
+      if (!isPlaying) return;
+      isDragging = true;
+      moveCircle(e.touches[0]);
     });
+
+    window.addEventListener('touchmove', (e) => {
+      if (!isPlaying || !isDragging) return;
+      moveCircle(e.touches[0]);
+    });
+
+    window.addEventListener('touchend', () => {
+      isDragging = false;
+    });
+
+    function moveCircle(touch) {
+      const radius = 18;
+      posX = Math.max(0, Math.min(window.innerWidth - radius * 2, touch.clientX - radius));
+      posY = Math.max(0, Math.min(window.innerHeight - radius * 2, touch.clientY - radius));
+      updatePlayerPosition();
+    }
+
+    // Eventos de mouse para PC
+    window.addEventListener('mousedown', (e) => {
+      if (!isPlaying) return;
+      isDragging = true;
+      moveCircleMouse(e);
+    });
+
+    window.addEventListener('mousemove', (e) => {
+      if (!isPlaying || !isDragging) return;
+      moveCircleMouse(e);
+    });
+
+    window.addEventListener('mouseup', () => {
+      isDragging = false;
+    });
+
+    function moveCircleMouse(e) {
+      const radius = 18;
+      posX = Math.max(0, Math.min(window.innerWidth - radius * 2, e.clientX - radius));
+      posY = Math.max(0, Math.min(window.innerHeight - radius * 2, e.clientY - radius));
+      updatePlayerPosition();
+    }
   </script>
 </body>
 </html>
