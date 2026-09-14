@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Wonderland</title>
+  <title>Snake Wonderland</title>
   <style>
     * {
       box-sizing: border-box;
@@ -11,14 +11,14 @@
       padding: 0;
       user-select: none;
       -webkit-user-select: none;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
     }
 
     body, html {
       width: 100%;
       height: 100%;
       overflow: hidden;
-      background-color: #FFF9D2;
+      background-color: #1a1a2e;
       touch-action: none;
     }
 
@@ -26,15 +26,26 @@
       position: relative;
       width: 100vw;
       height: 100vh;
-      background-color: #FFF3B0;
+      background: radial-gradient(circle at center, #16213e 0%, #0f3460 100%);
+    }
+
+    /* Grid de fondo decorativo */
+    .bg-grid {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      background-image: 
+        linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+      background-size: 30px 30px;
     }
 
     /* HUD Superior */
     .hud {
       position: absolute;
-      top: 15px;
-      left: 15px;
-      right: 15px;
+      top: 20px;
+      left: 20px;
+      right: 20px;
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -42,59 +53,89 @@
       pointer-events: none;
     }
 
-    .hud-group {
-      display: flex;
-      gap: 10px;
-    }
-
     .badge {
-      background: rgba(255, 255, 255, 0.9);
-      padding: 8px 14px;
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      padding: 10px 18px;
       border-radius: 20px;
-      font-weight: bold;
-      font-size: 14px;
-      color: #6C5CE7;
-      border: 2px solid #FFEAA7;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+      font-weight: 700;
+      font-size: 15px;
+      color: #e94560;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+      letter-spacing: 0.5px;
     }
 
-    /* Personaje principal: Único círculo pastel limpio */
-    #player-circle {
+    .badge-target {
+      color: #00fff5;
+    }
+
+    /* Componentes de la Viborita */
+    .snake-node {
       position: absolute;
-      width: 36px;
-      height: 36px;
       border-radius: 50%;
-      background: #74B9FF;
-      border: 3px solid #0984E3;
-      box-shadow: 0 4px 8px rgba(116, 185, 255, 0.4);
+      pointer-events: none;
+      transition: background 0.3s ease;
+    }
+
+    .snake-head {
+      width: 32px;
+      height: 32px;
+      background: #00fff5;
+      box-shadow: 0 0 15px #00fff5;
+      z-index: 6;
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      padding: 4px;
+    }
+
+    /* Ojitos de la víbora */
+    .snake-head::before, .snake-head::after {
+      content: '';
+      width: 6px;
+      height: 6px;
+      background-color: #0f3460;
+      border-radius: 50%;
+    }
+
+    .snake-body {
+      width: 26px;
+      height: 26px;
+      background: #00adb5;
+      box-shadow: 0 0 8px rgba(0, 173, 181, 0.5);
       z-index: 5;
     }
 
     /* Coleccionables */
     .item {
       position: absolute;
-      width: 30px;
-      height: 30px;
+      width: 34px;
+      height: 34px;
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 18px;
-      animation: float 1.5s infinite ease-in-out;
+      font-size: 20px;
+      animation: float 2s infinite ease-in-out;
+      filter: drop-shadow(0 0 8px rgba(255, 105, 180, 0.6));
     }
 
     @keyframes float {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-5px); }
+      0%, 100% { transform: translateY(0) scale(1); }
+      50% { transform: translateY(-7px) scale(1.08); }
     }
 
-    /* Modal / Pantalla inicial */
+    /* Overlay / Menú */
     .overlay {
       display: flex;
       position: absolute;
       top: 0; left: 0;
       width: 100%; height: 100%;
-      background: rgba(255, 249, 210, 0.92);
+      background: rgba(15, 52, 96, 0.85);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
       z-index: 20;
       flex-direction: column;
       justify-content: center;
@@ -104,61 +145,62 @@
     }
 
     .overlay-card {
-      background: white;
-      border: 4px solid #FDCB6E;
-      border-radius: 20px;
-      padding: 25px 20px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      border-radius: 24px;
+      padding: 35px 25px;
       width: 90%;
-      max-width: 340px;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+      max-width: 360px;
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
     }
 
     .overlay h2 { 
-      color: #FF7675; 
-      margin-bottom: 15px; 
-      font-size: 24px;
+      color: #00fff5; 
+      margin-bottom: 20px; 
+      font-size: 26px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
     }
 
     .btn-action {
-      background: #55E6C1;
+      background: linear-gradient(45deg, #e94560, #ff6b6b);
       border: none;
-      padding: 12px 24px;
-      border-radius: 12px;
-      color: #2D3436;
-      font-weight: bold;
+      padding: 14px 32px;
+      border-radius: 50px;
+      color: #ffffff;
+      font-weight: 700;
       font-size: 16px;
       cursor: pointer;
-      margin-top: 10px;
-      box-shadow: 0 4px 0 #00B894;
+      box-shadow: 0 4px 15px rgba(233, 69, 96, 0.4);
+      transition: all 0.2s ease;
     }
 
     .btn-action:active { 
-      transform: translateY(2px); 
-      box-shadow: none; 
+      transform: scale(0.96);
+      box-shadow: 0 2px 8px rgba(233, 69, 96, 0.4);
     }
   </style>
 </head>
 <body>
 
   <div id="game-container">
+    <div class="bg-grid"></div>
+    
     <div class="hud">
-      <div class="hud-group">
-        <div class="badge">Nivel <span id="level-num">1</span>/20</div>
-        <div class="badge">🪙 <span id="coins">0</span></div>
-      </div>
-      <div class="badge">Meta: <span id="collected">0</span>/<span id="target">5</span> 🌸</div>
+      <div class="badge">Nivel <span id="level-num">1</span>/20</div>
+      <div class="badge badge-target">Flores: <span id="collected">0</span>/<span id="target">5</span> 🌸</div>
     </div>
 
-    <!-- Círculo sin emoji -->
-    <div id="player-circle"></div>
+    <!-- Contenedor para el cuerpo de la serpiente -->
+    <div id="snake-container"></div>
 
     <!-- Items -->
     <div id="items-container"></div>
 
-    <!-- Cartel inicial -->
+    <!-- Cartel inicial / nivel -->
     <div id="level-modal" class="overlay">
       <div class="overlay-card">
-        <h2 id="modal-title">¡Bienvenida/o!</h2>
+        <h2 id="modal-title">¡Viborita!</h2>
         <button class="btn-action" onclick="startLevel()">¡Empezar!</button>
       </div>
     </div>
@@ -166,25 +208,25 @@
 
   <script>
     const container = document.getElementById('game-container');
-    const player = document.getElementById('player-circle');
+    const snakeContainer = document.getElementById('snake-container');
     const itemsContainer = document.getElementById('items-container');
     const levelDisplay = document.getElementById('level-num');
-    const coinsDisplay = document.getElementById('coins');
     const collectedDisplay = document.getElementById('collected');
     const targetDisplay = document.getElementById('target');
     const levelModal = document.getElementById('level-modal');
 
     let currentLevel = 1;
-    let coins = 0;
     let targetItems = 5;
     let collectedItems = 0;
     let isPlaying = false;
 
-    let posX = window.innerWidth / 2 - 18;
-    let posY = window.innerHeight / 2 - 18;
+    // Configuración de la serpiente
+    const SEGMENT_DISTANCE = 14;
+    let snakeBody = []; // Guardará las posiciones {x, y} de cada nodo
+    let snakeElements = []; // Nodos DOM
+    let targetX = window.innerWidth / 2;
+    let targetY = window.innerHeight / 2;
     let items = [];
-
-    let isDragging = false;
 
     function startLevel() {
       levelModal.style.display = 'none';
@@ -195,23 +237,77 @@
       targetDisplay.innerText = targetItems;
       collectedDisplay.innerText = collectedItems;
 
-      posX = window.innerWidth / 2 - 18;
-      posY = window.innerHeight / 2 - 18;
-      updatePlayerPosition();
+      targetX = window.innerWidth / 2;
+      targetY = window.innerHeight / 2;
 
+      initSnake();
       spawnItems();
       isPlaying = true;
+      requestAnimationFrame(gameLoop);
     }
 
-    function updatePlayerPosition() {
-      player.style.left = posX + 'px';
-      player.style.top = posY + 'px';
-      checkCollisions();
+    function initSnake() {
+      snakeContainer.innerHTML = '';
+      snakeBody = [];
+      snakeElements = [];
+
+      // Tamaño inicial: cabeza + 3 segmentos
+      const initialLength = 4;
+      for (let i = 0; i < initialLength; i++) {
+        snakeBody.push({ x: targetX, y: targetY + (i * SEGMENT_DISTANCE) });
+        
+        const el = document.createElement('div');
+        el.className = 'snake-node ' + (i === 0 ? 'snake-head' : 'snake-body');
+        snakeContainer.appendChild(el);
+        snakeElements.push(el);
+      }
+    }
+
+    function addSnakeSegment() {
+      const lastSegment = snakeBody[snakeBody.length - 1];
+      snakeBody.push({ x: lastSegment.x, y: lastSegment.y });
+
+      const el = document.createElement('div');
+      el.className = 'snake-node snake-body';
+      snakeContainer.appendChild(el);
+      snakeElements.push(el);
+    }
+
+    function updateSnakePositions() {
+      if (snakeBody.length === 0) return;
+
+      // Movimiento suave de la cabeza hacia el objetivo (interpolación)
+      snakeBody[0].x += (targetX - snakeBody[0].x) * 0.2;
+      snakeBody[0].y += (targetY - snakeBody[0].y) * 0.2;
+
+      // El cuerpo sigue a la cabeza manteniendo la distancia
+      for (let i = 1; i < snakeBody.length; i++) {
+        const prev = snakeBody[i - 1];
+        const current = snakeBody[i];
+        const dx = prev.x - current.x;
+        const dy = prev.y - current.y;
+        const distance = Math.hypot(dx, dy);
+
+        if (distance > SEGMENT_DISTANCE) {
+          const angle = Math.atan2(dy, dx);
+          current.x = prev.x - Math.cos(angle) * SEGMENT_DISTANCE;
+          current.y = prev.y - Math.sin(angle) * SEGMENT_DISTANCE;
+        }
+      }
+
+      // Renderizar en pantalla
+      for (let i = 0; i < snakeElements.length; i++) {
+        const el = snakeElements[i];
+        const pos = snakeBody[i];
+        const offset = i === 0 ? 16 : 13; // Ajuste según diámetro del nodo
+        el.style.left = (pos.x - offset) + 'px';
+        el.style.top = (pos.y - offset) + 'px';
+      }
     }
 
     function spawnItems() {
       items = [];
-      const padding = 50;
+      const padding = 60;
       const maxX = window.innerWidth - padding;
       const maxY = window.innerHeight - padding;
 
@@ -220,8 +316,7 @@
           id: i,
           x: Math.random() * (maxX - padding) + padding,
           y: Math.random() * (maxY - padding * 2) + padding + 40,
-          type: Math.random() > 0.3 ? 'flower' : 'coin',
-          icon: Math.random() > 0.3 ? '🌸' : '🪙'
+          icon: '🌸'
         });
       }
       renderItems();
@@ -232,34 +327,30 @@
       items.forEach(item => {
         const el = document.createElement('div');
         el.className = 'item';
-        el.style.left = item.x + 'px';
-        el.style.top = item.y + 'px';
+        el.style.left = (item.x - 17) + 'px';
+        el.style.top = (item.y - 17) + 'px';
         el.innerText = item.icon;
         itemsContainer.appendChild(el);
       });
     }
 
     function checkCollisions() {
-      if (!isPlaying) return;
+      if (!isPlaying || snakeBody.length === 0) return;
+
+      const head = snakeBody[0];
 
       items = items.filter(item => {
-        const dist = Math.hypot(posX - item.x, posY - item.y);
-        if (dist < 32) {
-          if (item.type === 'flower') {
-            collectedItems++;
-            collectedDisplay.innerText = collectedItems;
-          } else {
-            coins += 10;
-            coinsDisplay.innerText = coins;
-          }
+        const dist = Math.hypot(head.x - item.x, head.y - item.y);
+        if (dist < 28) {
+          collectedItems++;
+          collectedDisplay.innerText = collectedItems;
+          addSnakeSegment(); // Crece la viborita al comer
           return false;
         }
         return true;
       });
 
-      renderItems();
-
-      if (items.length < 3) {
+      if (items.length < 5) {
         spawnMoreItems();
       }
 
@@ -269,7 +360,7 @@
     }
 
     function spawnMoreItems() {
-      const padding = 50;
+      const padding = 60;
       const maxX = window.innerWidth - padding;
       const maxY = window.innerHeight - padding;
 
@@ -278,8 +369,7 @@
           id: Math.random(),
           x: Math.random() * (maxX - padding) + padding,
           y: Math.random() * (maxY - padding * 2) + padding + 40,
-          type: Math.random() > 0.3 ? 'flower' : 'coin',
-          icon: Math.random() > 0.3 ? '🌸' : '🪙'
+          icon: '🌸'
         });
       }
       renderItems();
@@ -289,7 +379,7 @@
       isPlaying = false;
 
       if (currentLevel >= 20) {
-        document.getElementById('modal-title').innerText = '🎉 ¡FELICIDADES!';
+        document.getElementById('modal-title').innerText = '🎉 ¡JUEGO COMPLETADO!';
         currentLevel = 1;
       } else {
         currentLevel++;
@@ -298,51 +388,31 @@
       levelModal.style.display = 'flex';
     }
 
-    // Eventos táctiles
+    function gameLoop() {
+      if (isPlaying) {
+        updateSnakePositions();
+        checkCollisions();
+        requestAnimationFrame(gameLoop);
+      }
+    }
+
+    // Controles Táctiles y Ratón
+    function setTargetPos(x, y) {
+      targetX = Math.max(16, Math.min(window.innerWidth - 16, x));
+      targetY = Math.max(16, Math.min(window.innerHeight - 16, y));
+    }
+
     window.addEventListener('touchstart', (e) => {
-      if (!isPlaying) return;
-      isDragging = true;
-      moveCircle(e.touches[0]);
+      if (isPlaying) setTargetPos(e.touches[0].clientX, e.touches[0].clientY);
     });
 
     window.addEventListener('touchmove', (e) => {
-      if (!isPlaying || !isDragging) return;
-      moveCircle(e.touches[0]);
-    });
-
-    window.addEventListener('touchend', () => {
-      isDragging = false;
-    });
-
-    function moveCircle(touch) {
-      const radius = 18;
-      posX = Math.max(0, Math.min(window.innerWidth - radius * 2, touch.clientX - radius));
-      posY = Math.max(0, Math.min(window.innerHeight - radius * 2, touch.clientY - radius));
-      updatePlayerPosition();
-    }
-
-    // Eventos de mouse para PC
-    window.addEventListener('mousedown', (e) => {
-      if (!isPlaying) return;
-      isDragging = true;
-      moveCircleMouse(e);
+      if (isPlaying) setTargetPos(e.touches[0].clientX, e.touches[0].clientY);
     });
 
     window.addEventListener('mousemove', (e) => {
-      if (!isPlaying || !isDragging) return;
-      moveCircleMouse(e);
+      if (isPlaying) setTargetPos(e.clientX, e.clientY);
     });
-
-    window.addEventListener('mouseup', () => {
-      isDragging = false;
-    });
-
-    function moveCircleMouse(e) {
-      const radius = 18;
-      posX = Math.max(0, Math.min(window.innerWidth - radius * 2, e.clientX - radius));
-      posY = Math.max(0, Math.min(window.innerHeight - radius * 2, e.clientY - radius));
-      updatePlayerPosition();
-    }
   </script>
 </body>
 </html>
