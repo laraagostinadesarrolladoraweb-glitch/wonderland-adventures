@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Wonderland</title>
+  <title>Cosmic Neon Snake</title>
   <style>
     * {
       box-sizing: border-box;
@@ -18,7 +18,7 @@
       width: 100%;
       height: 100%;
       overflow: hidden;
-      background-color: #0b0c10;
+      background-color: #050608;
       touch-action: none;
     }
 
@@ -26,7 +26,24 @@
       position: relative;
       width: 100vw;
       height: 100vh;
-      background: radial-gradient(circle at center, #1f1f38 0%, #0b0c10 100%);
+      background: radial-gradient(circle at center, #111428 0%, #050608 100%);
+      overflow: hidden;
+    }
+
+    /* Borde peligroso de la pantalla */
+    .screen-border-warning {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      border: 3px solid rgba(255, 0, 85, 0.4);
+      box-shadow: inset 0 0 25px rgba(255, 0, 85, 0.3);
+      pointer-events: none;
+      z-index: 2;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .screen-border-danger {
+      border-color: rgba(255, 0, 85, 0.9);
+      box-shadow: inset 0 0 50px rgba(255, 0, 85, 0.7);
     }
 
     /* Grid de fondo decorativo espacial */
@@ -37,7 +54,7 @@
       background-image: 
         linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
         linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
-      background-size: 35px 35px;
+      background-size: 40px 40px;
     }
 
     /* HUD Superior */
@@ -53,22 +70,73 @@
       pointer-events: none;
     }
 
+    .hud-group {
+      display: flex;
+      gap: 12px;
+    }
+
     .badge {
-      background: rgba(255, 255, 255, 0.07);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
+      background: rgba(255, 255, 255, 0.06);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
       padding: 10px 18px;
       border-radius: 20px;
       font-weight: 700;
-      font-size: 15px;
+      font-size: 14px;
       color: #00f0ff;
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+      border: 1px solid rgba(0, 240, 255, 0.2);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
       letter-spacing: 0.5px;
     }
 
-    .badge-target {
+    .badge-length {
       color: #ff007f;
+      border-color: rgba(255, 0, 127, 0.2);
+    }
+
+    /* Tarjeta de Facto Curioso Flotante */
+    .fact-card {
+      position: absolute;
+      bottom: 25px;
+      left: 50%;
+      transform: translateX(-50%) translateY(120px);
+      width: 90%;
+      max-width: 520px;
+      background: rgba(15, 18, 35, 0.85);
+      backdrop-filter: blur(15px);
+      -webkit-backdrop-filter: blur(15px);
+      border: 1px solid rgba(0, 240, 255, 0.4);
+      border-radius: 20px;
+      padding: 18px 22px;
+      z-index: 15;
+      box-shadow: 0 10px 35px rgba(0, 240, 255, 0.25);
+      opacity: 0;
+      transition: transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.5s ease;
+      pointer-events: none;
+    }
+
+    .fact-card.visible {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+
+    .fact-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      font-weight: 800;
+      color: #ff007f;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 6px;
+    }
+
+    .fact-text {
+      color: #e0e6ed;
+      font-size: 14px;
+      line-height: 1.45;
+      font-weight: 500;
     }
 
     /* Componentes de la Viborita Neón */
@@ -90,12 +158,12 @@
       padding: 4px;
     }
 
-    /* Ojitos de la víbora */
+    /* Ojitos orientables de la víbora */
     .snake-head::before, .snake-head::after {
       content: '';
       width: 6px;
       height: 6px;
-      background-color: #0b0c10;
+      background-color: #050608;
       border-radius: 50%;
     }
 
@@ -105,34 +173,15 @@
       z-index: 5;
     }
 
-    /* Coleccionables (Mundos) */
-    .item {
-      position: absolute;
-      width: 36px;
-      height: 36px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 22px;
-      animation: float 2.5s infinite ease-in-out;
-      filter: drop-shadow(0 0 12px rgba(0, 240, 255, 0.8));
-    }
-
-    @keyframes float {
-      0%, 100% { transform: translateY(0) scale(1); }
-      50% { transform: translateY(-8px) scale(1.1); }
-    }
-
     /* Overlay / Menú */
     .overlay {
       display: flex;
       position: absolute;
       top: 0; left: 0;
       width: 100%; height: 100%;
-      background: rgba(11, 12, 16, 0.85);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
+      background: rgba(5, 6, 8, 0.88);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
       z-index: 20;
       flex-direction: column;
       justify-content: center;
@@ -143,26 +192,44 @@
 
     .overlay-card {
       background: rgba(255, 255, 255, 0.04);
-      border: 1px solid rgba(255, 255, 255, 0.15);
+      border: 1px solid rgba(0, 240, 255, 0.3);
       border-radius: 24px;
       padding: 35px 25px;
       width: 90%;
-      max-width: 360px;
-      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+      max-width: 400px;
+      box-shadow: 0 0 40px rgba(0, 240, 255, 0.15);
     }
 
     .overlay h2 { 
       color: #00f0ff; 
-      margin-bottom: 20px; 
-      font-size: 26px;
+      margin-bottom: 12px; 
+      font-size: 28px;
       letter-spacing: 1px;
-      text-shadow: 0 0 10px rgba(0, 240, 255, 0.5);
+      text-shadow: 0 0 15px rgba(0, 240, 255, 0.6);
+    }
+
+    .overlay p {
+      color: #a0aec0;
+      font-size: 14px;
+      line-height: 1.5;
+      margin-bottom: 25px;
+    }
+
+    .game-over-fact {
+      background: rgba(0, 240, 255, 0.08);
+      border: 1px dashed rgba(0, 240, 255, 0.3);
+      border-radius: 14px;
+      padding: 12px 15px;
+      margin-bottom: 20px;
+      color: #e2e8f0;
+      font-size: 13px;
+      text-align: left;
     }
 
     .btn-action {
       background: linear-gradient(45deg, #ff007f, #7928ca);
       border: none;
-      padding: 14px 32px;
+      padding: 14px 36px;
       border-radius: 50px;
       color: #ffffff;
       font-weight: 700;
@@ -172,9 +239,13 @@
       transition: all 0.2s ease;
     }
 
+    .btn-action:hover {
+      transform: scale(1.05);
+      box-shadow: 0 6px 25px rgba(255, 0, 127, 0.7);
+    }
+
     .btn-action:active { 
       transform: scale(0.96);
-      box-shadow: 0 2px 10px rgba(255, 0, 127, 0.5);
     }
   </style>
 </head>
@@ -182,22 +253,34 @@
 
   <div id="game-container">
     <div class="bg-grid"></div>
+    <div id="border-warning" class="screen-border-warning"></div>
     
     <div class="hud">
-      <div class="badge">Nivel <span id="level-num">1</span>/20</div>
-      <div class="badge badge-target">Mundos: <span id="collected">0</span>/<span id="target">5</span> 🪐</div>
+      <div class="hud-group">
+        <div class="badge">Nivel <span id="level-num">1</span></div>
+        <div class="badge badge-length">Largo: <span id="length-num">4</span>m</div>
+      </div>
+      <div class="badge">Tiempo: <span id="time-num">0</span>s</div>
     </div>
 
     <!-- Contenedor para la serpiente -->
     <div id="snake-container"></div>
 
-    <!-- Mundos -->
-    <div id="items-container"></div>
+    <!-- Tarjeta de curioso dato flotante -->
+    <div id="fact-card" class="fact-card">
+      <div class="fact-title">✨ Facto Cósmico</div>
+      <div id="fact-text" class="fact-text">Cargando curiosidades del universo...</div>
+    </div>
 
-    <!-- Cartel inicial / nivel -->
+    <!-- Cartel inicial / Game Over -->
     <div id="level-modal" class="overlay">
       <div class="overlay-card">
         <h2 id="modal-title">¡Bienvenido/a!</h2>
+        <p id="modal-desc">Navega libremente con la viborita neón. Crecerá de forma continua. <b>¡No choques contra los bordes de la pantalla!</b></p>
+        <div id="game-over-fact-box" class="game-over-fact" style="display: none;">
+          <strong style="color:#00f0ff;">🚀 Datos del Espacio:</strong>
+          <span id="modal-fact-text"></span>
+        </div>
         <button class="btn-action" onclick="startLevel()">¡Empezar!</button>
       </div>
     </div>
@@ -206,16 +289,22 @@
   <script>
     const container = document.getElementById('game-container');
     const snakeContainer = document.getElementById('snake-container');
-    const itemsContainer = document.getElementById('items-container');
+    const borderWarning = document.getElementById('border-warning');
     const levelDisplay = document.getElementById('level-num');
-    const collectedDisplay = document.getElementById('collected');
-    const targetDisplay = document.getElementById('target');
+    const lengthDisplay = document.getElementById('length-num');
+    const timeDisplay = document.getElementById('time-num');
     const levelModal = document.getElementById('level-modal');
+    const factCard = document.getElementById('fact-card');
+    const factText = document.getElementById('fact-text');
+    const gameOverFactBox = document.getElementById('game-over-fact-box');
+    const modalFactText = document.getElementById('modal-fact-text');
 
     let currentLevel = 1;
-    let targetItems = 5;
-    let collectedItems = 0;
     let isPlaying = false;
+    let timeSurvived = 0;
+    let timeInterval = null;
+    let factInterval = null;
+    let growthInterval = null;
 
     // Configuración de la serpiente
     const SEGMENT_DISTANCE = 14;
@@ -223,32 +312,74 @@
     let snakeElements = []; 
     let targetX = window.innerWidth / 2;
     let targetY = window.innerHeight / 2;
-    let items = [];
 
-    // Íconos de mundos
-    const worldIcons = ['🪐', '🌍', '🌌', '🪐', '🌎'];
-
-    // Paleta Neón Multicolor para el cuerpo de la serpiente
+    // Paleta Neón Multicolor dinámica
     const neonColors = [
       '#ff007f', '#00f0ff', '#7000ff', '#00ff66', 
       '#ffea00', '#ff0055', '#00e5ff', '#a800ff'
     ];
 
+    // Colección de curiosidades del espacio y los planetas
+    const spaceFacts = [
+      "El Sol representa más del 99.8% de toda la masa del Sistema Solar.",
+      "Un día en Venus dura más que un año entero en Venus.",
+      "En Marte se encuentra el Monte Olimpo, un volcán tres veces más alto que el Monte Everest.",
+      "Saturno no es el único planeta con anillos: Júpiter, Urano y Neptuno también los tienen.",
+      "En el espacio reina el silencio absoluto, ya que las ondas sonoras necesitan un medio para viajar.",
+      "Existen más estrellas en el universo que granos de arena en todas las playas de la Tierra.",
+      "La huella de los astronautas en la Luna permanecerá allí durante millones de años porque no hay viento.",
+      "En Urano, las estaciones duran 21 años cada una debido a su extrema inclinación.",
+      "En Neptuno se registran los vientos más veloces del sistema solar, alcanzando 2,100 km/h.",
+      "Un traje espacial completo de la NASA cuesta alrededor de 12 millones de dólares.",
+      "Si juntaras todas las lunas del sistema solar, ¡habría más de 200 orbitando distintos planetas!",
+      "Los púlsares son estrellas de neutrones que pueden girar cientos de veces por segundo.",
+      "La galaxia de Andrómeda se está acercando a la Vía Láctea y colisionarán dentro de 4.5 mil millones de años."
+    ];
+
     function startLevel() {
       levelModal.style.display = 'none';
-      targetItems = 3 + (currentLevel * 2);
-      collectedItems = 0;
-      
+      gameOverFactBox.style.display = 'none';
+      isPlaying = true;
+      timeSurvived = 0;
+      currentLevel = 1;
+
       levelDisplay.innerText = currentLevel;
-      targetDisplay.innerText = targetItems;
-      collectedDisplay.innerText = collectedItems;
+      timeDisplay.innerText = timeSurvived;
 
       targetX = window.innerWidth / 2;
       targetY = window.innerHeight / 2;
 
       initSnake();
-      spawnItems();
-      isPlaying = true;
+
+      // Temporizadores de tiempo y crecimiento continuo
+      clearInterval(timeInterval);
+      timeInterval = setInterval(() => {
+        if (isPlaying) {
+          timeSurvived++;
+          timeDisplay.innerText = timeSurvived;
+
+          // Subir de nivel cada 15 segundos sobrevivendo
+          if (timeSurvived % 15 === 0) {
+            currentLevel++;
+            levelDisplay.innerText = currentLevel;
+          }
+        }
+      }, 1000);
+
+      // Crecimiento continuo automático de la viborita
+      clearInterval(growthInterval);
+      growthInterval = setInterval(() => {
+        if (isPlaying) {
+          addSnakeSegment();
+          lengthDisplay.innerText = snakeBody.length;
+        }
+      }, 1200);
+
+      // Mostrar curiosidad periódicamente
+      clearInterval(factInterval);
+      factInterval = setInterval(showRandomFact, 9000);
+      setTimeout(showRandomFact, 1500);
+
       requestAnimationFrame(gameLoop);
     }
 
@@ -271,6 +402,7 @@
         snakeContainer.appendChild(el);
         snakeElements.push(el);
       }
+      lengthDisplay.innerText = initialLength;
     }
 
     function applyNeonStyle(element, index) {
@@ -292,11 +424,38 @@
     }
 
     function updateSnakePositions() {
-      if (snakeBody.length === 0) return;
+      if (snakeBody.length === 0 || !isPlaying) return;
 
-      // Movimiento de la cabeza
-      snakeBody[0].x += (targetX - snakeBody[0].x) * 0.2;
-      snakeBody[0].y += (targetY - snakeBody[0].y) * 0.2;
+      // Movimiento suave de la cabeza hacia el cursor/toque
+      snakeBody[0].x += (targetX - snakeBody[0].x) * 0.18;
+      snakeBody[0].y += (targetY - snakeBody[0].y) * 0.18;
+
+      const head = snakeBody[0];
+      const headRadius = 16;
+
+      // Detección de peligro por cercanía a los bordes
+      const dangerMargin = 50;
+      if (
+        head.x < dangerMargin || 
+        head.x > window.innerWidth - dangerMargin || 
+        head.y < dangerMargin || 
+        head.y > window.innerHeight - dangerMargin
+      ) {
+        borderWarning.classList.add('screen-border-danger');
+      } else {
+        borderWarning.classList.remove('screen-border-danger');
+      }
+
+      // CHOQUE CON BORDES DE LA PANTALLA (Game Over)
+      if (
+        head.x - headRadius <= 0 || 
+        head.x + headRadius >= window.innerWidth || 
+        head.y - headRadius <= 0 || 
+        head.y + headRadius >= window.innerHeight
+      ) {
+        handleGameOver();
+        return;
+      }
 
       // El cuerpo sigue a la cabeza
       for (let i = 1; i < snakeBody.length; i++) {
@@ -323,103 +482,45 @@
       }
     }
 
-    function spawnItems() {
-      items = [];
-      const padding = 60;
-      const maxX = window.innerWidth - padding;
-      const maxY = window.innerHeight - padding;
-
-      for (let i = 0; i < 5; i++) {
-        const randomIcon = worldIcons[Math.floor(Math.random() * worldIcons.length)];
-        items.push({
-          id: i,
-          x: Math.random() * (maxX - padding) + padding,
-          y: Math.random() * (maxY - padding * 2) + padding + 40,
-          icon: randomIcon
-        });
-      }
-      renderItems();
-    }
-
-    function renderItems() {
-      itemsContainer.innerHTML = '';
-      items.forEach(item => {
-        const el = document.createElement('div');
-        el.className = 'item';
-        el.style.left = (item.x - 18) + 'px';
-        el.style.top = (item.y - 18) + 'px';
-        el.innerText = item.icon;
-        itemsContainer.appendChild(el);
-      });
-    }
-
-    function checkCollisions() {
-      if (!isPlaying || snakeBody.length === 0) return;
-
-      const head = snakeBody[0];
-
-      items = items.filter(item => {
-        const dist = Math.hypot(head.x - item.x, head.y - item.y);
-        if (dist < 30) {
-          collectedItems++;
-          collectedDisplay.innerText = collectedItems;
-          addSnakeSegment(); // Crece con cada mundo absorbido
-          return false;
-        }
-        return true;
-      });
-
-      if (items.length < 5) {
-        spawnMoreItems();
-      }
-
-      if (collectedItems >= targetItems) {
-        completeLevel();
-      }
-    }
-
-    function spawnMoreItems() {
-      const padding = 60;
-      const maxX = window.innerWidth - padding;
-      const maxY = window.innerHeight - padding;
-
-      while (items.length < 5) {
-        const randomIcon = worldIcons[Math.floor(Math.random() * worldIcons.length)];
-        items.push({
-          id: Math.random(),
-          x: Math.random() * (maxX - padding) + padding,
-          y: Math.random() * (maxY - padding * 2) + padding + 40,
-          icon: randomIcon
-        });
-      }
-      renderItems();
-    }
-
-    function completeLevel() {
+    function handleGameOver() {
       isPlaying = false;
+      clearInterval(timeInterval);
+      clearInterval(growthInterval);
+      clearInterval(factInterval);
 
-      if (currentLevel >= 20) {
-        document.getElementById('modal-title').innerText = '🎉 ¡UNIVERSO COMPLETADO!';
-        currentLevel = 1;
-      } else {
-        currentLevel++;
-        document.getElementById('modal-title').innerText = `¡Nivel ${currentLevel - 1} Superado!`;
-      }
+      document.getElementById('modal-title').innerText = '💥 ¡Colisión Espacial!';
+      document.getElementById('modal-desc').innerHTML = `Has tocado el límite del universo.<br>Sobreviviste <b>${timeSurvived} segundos</b> y tu viborita alcanzó <b>${snakeBody.length} metros</b>.`;
+      
+      const randomFact = spaceFacts[Math.floor(Math.random() * spaceFacts.length)];
+      modalFactText.innerText = randomFact;
+      gameOverFactBox.style.display = 'block';
+
+      factCard.classList.remove('visible');
       levelModal.style.display = 'flex';
+    }
+
+    function showRandomFact() {
+      if (!isPlaying) return;
+      const randomFact = spaceFacts[Math.floor(Math.random() * spaceFacts.length)];
+      factText.innerText = randomFact;
+      factCard.classList.add('visible');
+
+      setTimeout(() => {
+        factCard.classList.remove('visible');
+      }, 5500);
     }
 
     function gameLoop() {
       if (isPlaying) {
         updateSnakePositions();
-        checkCollisions();
         requestAnimationFrame(gameLoop);
       }
     }
 
-    // Controles
+    // Controles táctiles y ratón
     function setTargetPos(x, y) {
-      targetX = Math.max(16, Math.min(window.innerWidth - 16, x));
-      targetY = Math.max(16, Math.min(window.innerHeight - 16, y));
+      targetX = x;
+      targetY = y;
     }
 
     window.addEventListener('touchstart', (e) => {
@@ -432,6 +533,12 @@
 
     window.addEventListener('mousemove', (e) => {
       if (isPlaying) setTargetPos(e.clientX, e.clientY);
+    });
+
+    // Ajustar si la ventana cambia de tamaño
+    window.addEventListener('resize', () => {
+      targetX = Math.min(targetX, window.innerWidth - 30);
+      targetY = Math.min(targetY, window.innerHeight - 30);
     });
   </script>
 </body>
