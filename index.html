@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Snake Wonderland</title>
+  <title>Wonderland</title>
   <style>
     * {
       box-sizing: border-box;
@@ -18,7 +18,7 @@
       width: 100%;
       height: 100%;
       overflow: hidden;
-      background-color: #1a1a2e;
+      background-color: #0b0c10;
       touch-action: none;
     }
 
@@ -26,10 +26,10 @@
       position: relative;
       width: 100vw;
       height: 100vh;
-      background: radial-gradient(circle at center, #16213e 0%, #0f3460 100%);
+      background: radial-gradient(circle at center, #1f1f38 0%, #0b0c10 100%);
     }
 
-    /* Grid de fondo decorativo */
+    /* Grid de fondo decorativo espacial */
     .bg-grid {
       position: absolute;
       width: 100%;
@@ -37,7 +37,7 @@
       background-image: 
         linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
         linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
-      background-size: 30px 30px;
+      background-size: 35px 35px;
     }
 
     /* HUD Superior */
@@ -54,36 +54,35 @@
     }
 
     .badge {
-      background: rgba(255, 255, 255, 0.1);
+      background: rgba(255, 255, 255, 0.07);
       backdrop-filter: blur(10px);
       -webkit-backdrop-filter: blur(10px);
       padding: 10px 18px;
       border-radius: 20px;
       font-weight: 700;
       font-size: 15px;
-      color: #e94560;
+      color: #00f0ff;
       border: 1px solid rgba(255, 255, 255, 0.15);
       box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
       letter-spacing: 0.5px;
     }
 
     .badge-target {
-      color: #00fff5;
+      color: #ff007f;
     }
 
-    /* Componentes de la Viborita */
+    /* Componentes de la Viborita Neón */
     .snake-node {
       position: absolute;
       border-radius: 50%;
       pointer-events: none;
-      transition: background 0.3s ease;
     }
 
     .snake-head {
       width: 32px;
       height: 32px;
-      background: #00fff5;
-      box-shadow: 0 0 15px #00fff5;
+      background: #ffffff;
+      box-shadow: 0 0 15px #00f0ff, 0 0 30px #00f0ff;
       z-index: 6;
       display: flex;
       justify-content: space-around;
@@ -96,35 +95,33 @@
       content: '';
       width: 6px;
       height: 6px;
-      background-color: #0f3460;
+      background-color: #0b0c10;
       border-radius: 50%;
     }
 
     .snake-body {
       width: 26px;
       height: 26px;
-      background: #00adb5;
-      box-shadow: 0 0 8px rgba(0, 173, 181, 0.5);
       z-index: 5;
     }
 
-    /* Coleccionables */
+    /* Coleccionables (Mundos) */
     .item {
       position: absolute;
-      width: 34px;
-      height: 34px;
+      width: 36px;
+      height: 36px;
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 20px;
-      animation: float 2s infinite ease-in-out;
-      filter: drop-shadow(0 0 8px rgba(255, 105, 180, 0.6));
+      font-size: 22px;
+      animation: float 2.5s infinite ease-in-out;
+      filter: drop-shadow(0 0 12px rgba(0, 240, 255, 0.8));
     }
 
     @keyframes float {
       0%, 100% { transform: translateY(0) scale(1); }
-      50% { transform: translateY(-7px) scale(1.08); }
+      50% { transform: translateY(-8px) scale(1.1); }
     }
 
     /* Overlay / Menú */
@@ -133,9 +130,9 @@
       position: absolute;
       top: 0; left: 0;
       width: 100%; height: 100%;
-      background: rgba(15, 52, 96, 0.85);
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
+      background: rgba(11, 12, 16, 0.85);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
       z-index: 20;
       flex-direction: column;
       justify-content: center;
@@ -145,25 +142,25 @@
     }
 
     .overlay-card {
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(255, 255, 255, 0.18);
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.15);
       border-radius: 24px;
       padding: 35px 25px;
       width: 90%;
       max-width: 360px;
-      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
     }
 
     .overlay h2 { 
-      color: #00fff5; 
+      color: #00f0ff; 
       margin-bottom: 20px; 
       font-size: 26px;
-      text-transform: uppercase;
       letter-spacing: 1px;
+      text-shadow: 0 0 10px rgba(0, 240, 255, 0.5);
     }
 
     .btn-action {
-      background: linear-gradient(45deg, #e94560, #ff6b6b);
+      background: linear-gradient(45deg, #ff007f, #7928ca);
       border: none;
       padding: 14px 32px;
       border-radius: 50px;
@@ -171,13 +168,13 @@
       font-weight: 700;
       font-size: 16px;
       cursor: pointer;
-      box-shadow: 0 4px 15px rgba(233, 69, 96, 0.4);
+      box-shadow: 0 4px 20px rgba(255, 0, 127, 0.5);
       transition: all 0.2s ease;
     }
 
     .btn-action:active { 
       transform: scale(0.96);
-      box-shadow: 0 2px 8px rgba(233, 69, 96, 0.4);
+      box-shadow: 0 2px 10px rgba(255, 0, 127, 0.5);
     }
   </style>
 </head>
@@ -188,19 +185,19 @@
     
     <div class="hud">
       <div class="badge">Nivel <span id="level-num">1</span>/20</div>
-      <div class="badge badge-target">Flores: <span id="collected">0</span>/<span id="target">5</span> 🌸</div>
+      <div class="badge badge-target">Mundos: <span id="collected">0</span>/<span id="target">5</span> 🪐</div>
     </div>
 
-    <!-- Contenedor para el cuerpo de la serpiente -->
+    <!-- Contenedor para la serpiente -->
     <div id="snake-container"></div>
 
-    <!-- Items -->
+    <!-- Mundos -->
     <div id="items-container"></div>
 
     <!-- Cartel inicial / nivel -->
     <div id="level-modal" class="overlay">
       <div class="overlay-card">
-        <h2 id="modal-title">¡Viborita!</h2>
+        <h2 id="modal-title">¡Bienvenido/a!</h2>
         <button class="btn-action" onclick="startLevel()">¡Empezar!</button>
       </div>
     </div>
@@ -222,11 +219,20 @@
 
     // Configuración de la serpiente
     const SEGMENT_DISTANCE = 14;
-    let snakeBody = []; // Guardará las posiciones {x, y} de cada nodo
-    let snakeElements = []; // Nodos DOM
+    let snakeBody = []; 
+    let snakeElements = []; 
     let targetX = window.innerWidth / 2;
     let targetY = window.innerHeight / 2;
     let items = [];
+
+    // Íconos de mundos
+    const worldIcons = ['🪐', '🌍', '🌌', '🪐', '🌎'];
+
+    // Paleta Neón Multicolor para el cuerpo de la serpiente
+    const neonColors = [
+      '#ff007f', '#00f0ff', '#7000ff', '#00ff66', 
+      '#ffea00', '#ff0055', '#00e5ff', '#a800ff'
+    ];
 
     function startLevel() {
       levelModal.style.display = 'none';
@@ -251,16 +257,26 @@
       snakeBody = [];
       snakeElements = [];
 
-      // Tamaño inicial: cabeza + 3 segmentos
       const initialLength = 4;
       for (let i = 0; i < initialLength; i++) {
         snakeBody.push({ x: targetX, y: targetY + (i * SEGMENT_DISTANCE) });
         
         const el = document.createElement('div');
         el.className = 'snake-node ' + (i === 0 ? 'snake-head' : 'snake-body');
+        
+        if (i > 0) {
+          applyNeonStyle(el, i);
+        }
+        
         snakeContainer.appendChild(el);
         snakeElements.push(el);
       }
+    }
+
+    function applyNeonStyle(element, index) {
+      const color = neonColors[index % neonColors.length];
+      element.style.backgroundColor = color;
+      element.style.boxShadow = `0 0 10px ${color}, 0 0 20px ${color}`;
     }
 
     function addSnakeSegment() {
@@ -269,6 +285,8 @@
 
       const el = document.createElement('div');
       el.className = 'snake-node snake-body';
+      applyNeonStyle(el, snakeElements.length);
+      
       snakeContainer.appendChild(el);
       snakeElements.push(el);
     }
@@ -276,11 +294,11 @@
     function updateSnakePositions() {
       if (snakeBody.length === 0) return;
 
-      // Movimiento suave de la cabeza hacia el objetivo (interpolación)
+      // Movimiento de la cabeza
       snakeBody[0].x += (targetX - snakeBody[0].x) * 0.2;
       snakeBody[0].y += (targetY - snakeBody[0].y) * 0.2;
 
-      // El cuerpo sigue a la cabeza manteniendo la distancia
+      // El cuerpo sigue a la cabeza
       for (let i = 1; i < snakeBody.length; i++) {
         const prev = snakeBody[i - 1];
         const current = snakeBody[i];
@@ -295,11 +313,11 @@
         }
       }
 
-      // Renderizar en pantalla
+      // Renderizado
       for (let i = 0; i < snakeElements.length; i++) {
         const el = snakeElements[i];
         const pos = snakeBody[i];
-        const offset = i === 0 ? 16 : 13; // Ajuste según diámetro del nodo
+        const offset = i === 0 ? 16 : 13;
         el.style.left = (pos.x - offset) + 'px';
         el.style.top = (pos.y - offset) + 'px';
       }
@@ -312,11 +330,12 @@
       const maxY = window.innerHeight - padding;
 
       for (let i = 0; i < 5; i++) {
+        const randomIcon = worldIcons[Math.floor(Math.random() * worldIcons.length)];
         items.push({
           id: i,
           x: Math.random() * (maxX - padding) + padding,
           y: Math.random() * (maxY - padding * 2) + padding + 40,
-          icon: '🌸'
+          icon: randomIcon
         });
       }
       renderItems();
@@ -327,8 +346,8 @@
       items.forEach(item => {
         const el = document.createElement('div');
         el.className = 'item';
-        el.style.left = (item.x - 17) + 'px';
-        el.style.top = (item.y - 17) + 'px';
+        el.style.left = (item.x - 18) + 'px';
+        el.style.top = (item.y - 18) + 'px';
         el.innerText = item.icon;
         itemsContainer.appendChild(el);
       });
@@ -341,10 +360,10 @@
 
       items = items.filter(item => {
         const dist = Math.hypot(head.x - item.x, head.y - item.y);
-        if (dist < 28) {
+        if (dist < 30) {
           collectedItems++;
           collectedDisplay.innerText = collectedItems;
-          addSnakeSegment(); // Crece la viborita al comer
+          addSnakeSegment(); // Crece con cada mundo absorbido
           return false;
         }
         return true;
@@ -365,11 +384,12 @@
       const maxY = window.innerHeight - padding;
 
       while (items.length < 5) {
+        const randomIcon = worldIcons[Math.floor(Math.random() * worldIcons.length)];
         items.push({
           id: Math.random(),
           x: Math.random() * (maxX - padding) + padding,
           y: Math.random() * (maxY - padding * 2) + padding + 40,
-          icon: '🌸'
+          icon: randomIcon
         });
       }
       renderItems();
@@ -379,7 +399,7 @@
       isPlaying = false;
 
       if (currentLevel >= 20) {
-        document.getElementById('modal-title').innerText = '🎉 ¡JUEGO COMPLETADO!';
+        document.getElementById('modal-title').innerText = '🎉 ¡UNIVERSO COMPLETADO!';
         currentLevel = 1;
       } else {
         currentLevel++;
@@ -396,7 +416,7 @@
       }
     }
 
-    // Controles Táctiles y Ratón
+    // Controles
     function setTargetPos(x, y) {
       targetX = Math.max(16, Math.min(window.innerWidth - 16, x));
       targetY = Math.max(16, Math.min(window.innerHeight - 16, y));
